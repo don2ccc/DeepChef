@@ -31,6 +31,8 @@ If the user gives vague ingredients, ask them a question about scenarios (e.g. k
 If they give specific preferences or select an option, provide a recipe (type="recipe").
 `;
 
+export const maxDuration = 60; // 允许 Vercel 运行最多 60 秒
+
 export default async function handler(req: any, res: any) {
   // Enable CORS if needed (good practice for Serverless)
   res.setHeader('Access-Control-Allow-Credentials', 'true');
