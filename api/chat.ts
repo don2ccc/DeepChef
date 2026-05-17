@@ -65,23 +65,23 @@ export default async function handler(req: any, res: any) {
 
     let profileContext = "";
     if (profile) {
-      profileContext += \`\\nUser Settings:\\n- Language setting: \${profile.language === 'en' ? 'English' : 'Chinese'}. You MUST reply in this language.\\n\`;
+      profileContext += `\nUser Settings:\n- Language setting: ${profile.language === 'en' ? 'English' : 'Chinese'}. You MUST reply in this language.\n`;
     }
     if (profile && profile.isLoggedIn) {
-      profileContext += \`
+      profileContext += `
 User Profile (Use this to tailor your recipes):
-- Family members/portion size: \${profile.familyMembers || '1'}
-- Favorite Foods: \${profile.favoriteFoods || 'None specified'}
-- Flavor Preferences & Dietary Restrictions: \${profile.flavorPreferences || 'None specified'}
-\`;
+- Family members/portion size: ${profile.familyMembers || '1'}
+- Favorite Foods: ${profile.favoriteFoods || 'None specified'}
+- Flavor Preferences & Dietary Restrictions: ${profile.flavorPreferences || 'None specified'}
+`;
     }
 
     if (profile && profile.pantry && profile.pantry.length > 0) {
-      const pantryString = profile.pantry.map((item: any) => \`\${item.name} (\${item.amount || '若干'})\`).join(', ');
-      profileContext += \`\\nThe user currently has these ingredients in their pantry: \${pantryString}. Prioritize these if they ask what to cook using what they have.\`;
+      const pantryString = profile.pantry.map((item: any) => `${item.name} (${item.amount || '若干'})`).join(', ');
+      profileContext += `\nThe user currently has these ingredients in their pantry: ${pantryString}. Prioritize these if they ask what to cook using what they have.`;
     }
 
-    const systemInstructionWithProfile = SYSTEM_INSTRUCTION + "\\n" + profileContext;
+    const systemInstructionWithProfile = SYSTEM_INSTRUCTION + "\n" + profileContext;
 
     let resultJson = "";
 
@@ -113,11 +113,11 @@ User Profile (Use this to tailor your recipes):
       const choiceMsg = response.choices[0].message as any;
       let rawContent = choiceMsg.content || '{}';
 
-      const jsonMatch = rawContent.match(/\\`\\`\\`(?:json)?\\s*([\\s\\S]+?)\\s*\\`\\`\\`/);
+      const jsonMatch = rawContent.match(/```(?:json)?\s*([\s\S]+?)\s*```/);
       if (jsonMatch) {
          resultJson = jsonMatch[1];
       } else {
-         const curlyMatch = rawContent.match(/\\{[\\s\\S]*\\}/);
+         const curlyMatch = rawContent.match(/\{[\s\S]*\}/);
          if (curlyMatch) {
             resultJson = curlyMatch[0];
          } else {
@@ -152,11 +152,11 @@ User Profile (Use this to tailor your recipes):
       const choiceMsg = response.choices[0].message as any;
       let rawContent = choiceMsg.content || '{}';
 
-      const jsonMatch = rawContent.match(/\\`\\`\\`(?:json)?\\s*([\\s\\S]+?)\\s*\\`\\`\\`/);
+      const jsonMatch = rawContent.match(/```(?:json)?\s*([\s\S]+?)\s*```/);
       if (jsonMatch) {
          resultJson = jsonMatch[1];
       } else {
-         const curlyMatch = rawContent.match(/\\{[\\s\\S]*\\}/);
+         const curlyMatch = rawContent.match(/\{[\s\S]*\}/);
          if (curlyMatch) {
             resultJson = curlyMatch[0];
          } else {
