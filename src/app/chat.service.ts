@@ -55,13 +55,19 @@ export class ChatService {
     this.saveMessages(this.DEFAULT_MESSAGES);
   }
 
-  async sendMessage(content: string, profile?: any) {
+  loadMessagesFromHistory(msgs: Message[]) {
+    this.messages.set(msgs);
+    this.saveMessages(msgs);
+  }
+
+  async sendMessage(content: string, profile?: any, useReasoning: boolean = false, audioUrl?: string) {
     // Add user message optimistically
     const userMsg: Message = {
       id: Date.now().toString(),
       role: 'user',
       content,
-      type: 'text'
+      type: 'text',
+      audioUrl
     };
     
     this.messages.update(msgs => {
@@ -76,7 +82,8 @@ export class ChatService {
       const response = await firstValueFrom(
         this.http.post<{ message: Message }>('/api/chat', { 
           history: this.messages(),
-          profile
+          profile,
+          useReasoning
         })
       );
       

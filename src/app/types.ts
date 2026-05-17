@@ -14,6 +14,15 @@ export interface Message {
   options?: string[];
   recipe?: Recipe;
   feedback?: 'like' | 'dislike';
+  reasoning?: string;
+  audioUrl?: string;
+}
+
+export interface ChatSession {
+  id: string;
+  title: string;
+  messages: Message[];
+  updatedAt: number;
 }
 
 export interface SavedRecipe extends Recipe {

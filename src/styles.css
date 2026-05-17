@@ -13,6 +13,13 @@
     background-color: #f9fafb;
     margin: 0;
   }
+
+  details.details-none > summary::-webkit-details-marker {
+    display: none;
+  }
+  details.details-none > summary::marker {
+    display: none;
+  }
 }
 
 @layer utilities {

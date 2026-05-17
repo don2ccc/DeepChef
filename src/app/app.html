@@ -70,7 +70,17 @@
     <div class="flex-1 overflow-y-auto px-4 pb-4 custom-scrollbar">
       <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 px-2">History</h3>
       <div class="space-y-1">
-        <p class="px-3 py-2 text-sm text-gray-400">暂无历史记录</p>
+        @if (pastSessions().length > 0) {
+          @for (session of pastSessions(); track session.id) {
+            <button (click)="loadSession(session)" 
+              class="w-full text-left px-3 py-2 text-sm rounded-lg truncate transition-colors"
+              [class]="currentSessionId() === session.id ? 'bg-emerald-50 text-emerald-700 font-bold' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'">
+              {{ session.title }}
+            </button>
+          }
+        } @else {
+          <p class="px-3 py-2 text-sm text-gray-400">暂无历史记录</p>
+        }
       </div>
     </div>
     <div class="p-4 bg-gray-50 border-t border-gray-200">
@@ -246,6 +256,11 @@
           <div class="flex gap-4 max-w-3xl ml-auto justify-end">
             <div class="bg-emerald-600 text-white rounded-2xl rounded-tr-none p-4 shadow-md text-right mt-1 border border-emerald-700/50 max-w-[calc(100%-40px)]">
               <p class="text-sm leading-relaxed font-medium">{{ message.content }}</p>
+              @if (message.audioUrl) {
+                <div class="mt-3 text-left w-full relative group">
+                  <audio [src]="getSafeUrl(message.audioUrl)" controls class="h-8 max-w-full rounded-full border border-emerald-400 outline-none w-56 custom-audio opacity-90 hover:opacity-100 transition-opacity"></audio>
+                </div>
+              }
             </div>
             <div class="w-8 h-8 rounded-full bg-slate-100 border border-slate-200 flex-shrink-0 flex items-center justify-center text-slate-600 font-bold text-xs mt-1 shadow-sm">ME</div>
           </div>
@@ -276,20 +291,36 @@
               [(ngModel)]="userInput"
               name="userInput"
               autocomplete="off"
-              class="w-full pl-6 pr-32 py-4 bg-gray-50 border border-gray-200 rounded-xl focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/10 focus:outline-none text-sm font-sans transition-all" 
-              placeholder="Ask your AI Chef anything..." 
-              [disabled]="isLoading()"
+              class="w-full pl-6 pr-44 py-4 bg-gray-50 border border-gray-200 rounded-xl focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/10 focus:outline-none text-sm font-sans transition-all" 
+              placeholder="{{ isRecording() ? '正在倾听...' : 'Ask your AI Chef anything...' }}" 
+              [disabled]="isLoading() && !isRecording()"
             />
             
-            <div class="absolute right-1.5 top-1.5 bottom-1.5 flex items-center">
-              <button type="submit" [disabled]="!userInput() || isLoading()" class="h-full px-5 bg-emerald-600 text-white rounded-lg text-[11px] font-bold hover:bg-emerald-500 transition-colors disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed flex items-center justify-center tracking-wider shadow-sm uppercase">
+            <div class="absolute right-1.5 top-1.5 bottom-1.5 flex items-center gap-1.5">
+              <button type="button" (click)="toggleRecording()" [disabled]="isLoading()" [class.bg-rose-50]="isRecording()" [class.text-rose-600]="isRecording()" [class.text-gray-400]="!isRecording()" class="h-full px-3 rounded-lg hover:bg-gray-200 transition-colors flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed border border-transparent" [class.border-rose-200]="isRecording()" [class.animate-pulse]="isRecording()">
+                <span class="material-symbols-outlined">{{ isRecording() ? 'stop_circle' : 'mic' }}</span>
+              </button>
+              <button type="submit" [disabled]="!userInput() || isLoading() && !isRecording()" class="h-full px-5 bg-emerald-600 text-white rounded-lg text-[11px] font-bold hover:bg-emerald-500 transition-colors disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed flex items-center justify-center tracking-wider shadow-sm uppercase">
                 Send
               </button>
             </div>
           </form>
-          <div class="mt-3 flex justify-center items-center gap-1.5 text-center text-[10px] text-gray-400 uppercase tracking-widest font-bold">
-            <span class="material-symbols-outlined text-[12px] text-emerald-500">bolt</span> 
-            <span>Powered by DeepSeek Intelligent Culinary Engine</span>
+          <div class="mt-3 flex justify-between items-center px-1">
+            <label class="flex items-center gap-2 cursor-pointer group">
+              <div class="relative">
+                <input type="checkbox" [(ngModel)]="useReasoning" name="useReasoning" class="sr-only">
+                <div class="block w-10 h-6 bg-gray-200 rounded-full transition-colors group-hover:bg-gray-300" [class.bg-emerald-500]="useReasoning()"></div>
+                <div class="absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform shadow-sm" [class.translate-x-4]="useReasoning()"></div>
+              </div>
+              <span class="text-[11px] font-bold text-gray-500 group-hover:text-gray-700 transition-colors flex items-center gap-1 uppercase tracking-wider">
+                <span class="material-symbols-outlined text-[14px]">psychology</span>
+                深度思考模式 (R1)
+              </span>
+            </label>
+            <div class="flex items-center gap-1.5 text-center text-[10px] text-gray-400 uppercase tracking-widest font-bold">
+              <span class="material-symbols-outlined text-[12px] text-emerald-500">bolt</span> 
+              <span>Powered by DeepChef Engine</span>
+            </div>
           </div>
         </div>
       </div>

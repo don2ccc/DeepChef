@@ -53,7 +53,7 @@ export default async function handler(req: any, res: any) {
   }
 
   try {
-    const { history, profile } = req.body;
+    const { history, profile, useReasoning } = req.body;
     
     // Format history for the API
     const formattedHistory = history.map((msg: { role: string, content: string }) => ({
@@ -79,6 +79,7 @@ User Profile (Use this to tailor your recipes):
     const systemInstructionWithProfile = SYSTEM_INSTRUCTION + "\n" + profileContext;
 
     let resultJson = "";
+    let reasoningContent = "";
 
     if (process.env['DEEPSEEK_API_KEY'] && process.env['DEEPSEEK_API_KEY'] !== '') {
       // Use DeepSeek
@@ -97,12 +98,34 @@ User Profile (Use this to tailor your recipes):
         }))
       ];
       
-      const response = await deepseek.chat.completions.create({
-        model: 'deepseek-chat',
-        messages: messages as OpenAI.Chat.ChatCompletionMessageParam[],
-        response_format: { type: 'json_object' }
-      });
-      resultJson = response.choices[0].message.content || '{}';
+      const modelToUse = useReasoning ? 'deepseek-reasoner' : 'deepseek-chat';
+      const requestOptions: any = {
+        model: modelToUse,
+        messages: messages as OpenAI.Chat.ChatCompletionMessageParam[]
+      };
+      
+      if (!useReasoning) {
+        requestOptions.response_format = { type: 'json_object' };
+      }
+
+      const response = await deepseek.chat.completions.create(requestOptions);
+      
+      const choiceMsg = response.choices[0].message as any;
+      let rawContent = choiceMsg.content || '{}';
+      reasoningContent = choiceMsg.reasoning_content || '';
+
+      // Extract JSON using regex if reasoning mode (which doesn't enforce json object)
+      const jsonMatch = rawContent.match(/```(?:json)?\s*([\s\S]+?)\s*```/);
+      if (jsonMatch) {
+         resultJson = jsonMatch[1];
+      } else {
+         const curlyMatch = rawContent.match(/\{[\s\S]*\}/);
+         if (curlyMatch) {
+            resultJson = curlyMatch[0];
+         } else {
+            resultJson = rawContent;
+         }
+      }
     } else {
       if (!process.env['GEMINI_API_KEY'] || process.env['GEMINI_API_KEY'] === 'MY_GEMINI_API_KEY') {
         throw new Error('Please set DEEPSEEK_API_KEY in .env, or verify your GEMINI_API_KEY in AI Studio Settings.');
@@ -129,6 +152,9 @@ User Profile (Use this to tailor your recipes):
 
     const message = JSON.parse(resultJson);
     message.id = Date.now().toString();
+    if (reasoningContent) {
+      message.reasoning = reasoningContent;
+    }
     
     // Default image if missing or using Unsplash
     if (message.recipe && (!message.recipe.imageUrl || !message.recipe.imageUrl.startsWith('http'))) {
