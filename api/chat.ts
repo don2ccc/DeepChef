@@ -71,6 +71,11 @@ User Profile (Use this to tailor your recipes):
 `;
     }
 
+    if (profile && profile.pantry && profile.pantry.length > 0) {
+      const pantryString = profile.pantry.map((item: any) => `${item.name} (${item.amount || '若干'})`).join(', ');
+      profileContext += `\nThe user currently has these ingredients in their pantry: ${pantryString}. Prioritize these if they ask what to cook using what they have.`;
+    }
+
     const systemInstructionWithProfile = SYSTEM_INSTRUCTION + "\n" + profileContext;
 
     let resultJson = "";

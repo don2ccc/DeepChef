@@ -16,6 +16,18 @@ export interface Message {
   feedback?: 'like' | 'dislike';
 }
 
+export interface SavedRecipe extends Recipe {
+  id: string;
+  savedAt: number;
+}
+
+export interface PantryItem {
+  id: string;
+  name: string;
+  amount: string;
+  addedAt: number;
+}
+
 export interface Recipe {
   name: string;
   imageUrl: string;

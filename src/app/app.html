@@ -6,9 +6,15 @@
       <span>科学吃饭 DeepChef</span>
     </div>
     <nav class="hidden md:flex gap-6 items-center">
-      <a class="text-emerald-700 font-bold border-b-2 border-emerald-600 pb-1 text-sm font-sans" href="#">对话</a>
-      <a class="text-gray-500 font-medium hover:text-gray-900 transition-colors duration-200 text-sm font-sans" href="#">菜谱库</a>
-      <a class="text-gray-500 font-medium hover:text-gray-900 transition-colors duration-200 text-sm font-sans" href="#">食材管理</a>
+      <a class="cursor-pointer text-sm font-sans transition-colors duration-200" 
+         [class]="activeTab() === 'chat' ? 'text-emerald-700 font-bold border-b-2 border-emerald-600 pb-1' : 'text-gray-500 font-medium hover:text-gray-900'"
+         (click)="activeTab.set('chat')">对话</a>
+      <a class="cursor-pointer text-sm font-sans transition-colors duration-200" 
+         [class]="activeTab() === 'library' ? 'text-emerald-700 font-bold border-b-2 border-emerald-600 pb-1' : 'text-gray-500 font-medium hover:text-gray-900'"
+         (click)="activeTab.set('library')">菜谱库</a>
+      <a class="cursor-pointer text-sm font-sans transition-colors duration-200" 
+         [class]="activeTab() === 'pantry' ? 'text-emerald-700 font-bold border-b-2 border-emerald-600 pb-1' : 'text-gray-500 font-medium hover:text-gray-900'"
+         (click)="activeTab.set('pantry')">食材管理</a>
     </nav>
     <div class="flex items-center gap-4">
       <div class="flex items-center gap-2 text-xs text-gray-400 font-medium hidden sm:flex">
@@ -59,9 +65,12 @@
     </div>
   </aside>
 
-  <!-- Chat Area -->
-  <section class="flex-1 flex flex-col relative bg-white h-[calc(100vh-64px)]">
-    <div #chatContainer class="flex-1 overflow-y-auto px-6 md:px-12 py-8 space-y-6 custom-scrollbar pb-40">
+  <!-- Main Content Area -->
+  <section class="flex-1 flex flex-col relative bg-white h-[calc(100vh-64px)] overflow-hidden">
+    
+    <!-- Chat Tab -->
+    <div [class.hidden]="activeTab() !== 'chat'" class="flex-1 flex flex-col h-full relative">
+      <div #chatContainer class="flex-1 overflow-y-auto px-6 md:px-12 py-8 space-y-6 custom-scrollbar pb-40">
       
       @for (message of messages(); track message.id) {
         
@@ -162,10 +171,21 @@
                       </ul>
                     </div>
 
-                    <!-- Feedback -->
+                    <!-- Feedback & Saving -->
                     <div class="mt-4 pt-4 border-t border-gray-100 flex items-center justify-between">
-                      <span class="text-xs text-gray-400 font-medium tracking-wide">为您推荐的食谱有帮助吗？</span>
                       <div class="flex items-center gap-2">
+                        @if (isRecipeSaved(message.recipe.name)) {
+                          <button class="px-3 py-1.5 rounded bg-gray-100 text-gray-500 text-xs font-bold flex items-center gap-1 shadow-sm cursor-default">
+                            <span class="material-symbols-outlined text-[14px]">check</span> 已收藏
+                          </button>
+                        } @else {
+                          <button (click)="addRecipeToLibrary(message.recipe)" class="px-3 py-1.5 rounded bg-emerald-50 text-emerald-600 border border-emerald-200 hover:bg-emerald-100 hover:border-emerald-300 text-xs font-bold transition-colors flex items-center gap-1 shadow-sm">
+                            <span class="material-symbols-outlined text-[14px]">bookmark_add</span> 收藏菜谱
+                          </button>
+                        }
+                      </div>
+                      <div class="flex items-center gap-2">
+                        <span class="text-xs text-gray-400 font-medium tracking-wide">为您推荐的食谱有帮助吗？</span>
                         <button (click)="submitFeedback(message.id, 'like')" 
                                 [class.text-emerald-600]="message.feedback === 'like'"
                                 [class.bg-emerald-50]="message.feedback === 'like'"
@@ -216,32 +236,135 @@
       }
     </div>
 
-    <!-- Input Area -->
-    <div class="absolute bottom-0 w-full p-6 bg-gradient-to-t from-white via-white to-transparent pt-12 z-10">
-      <div class="max-w-3xl mx-auto relative px-2 md:px-0">
-        <form (submit)="sendMessage($event)" class="relative w-full shadow-lg rounded-xl">
-          <input 
-            type="text" 
-            [(ngModel)]="userInput"
-            name="userInput"
-            autocomplete="off"
-            class="w-full pl-6 pr-32 py-4 bg-gray-50 border border-gray-200 rounded-xl focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/10 focus:outline-none text-sm font-sans transition-all" 
-            placeholder="Ask your AI Chef anything..." 
-            [disabled]="isLoading()"
-          />
-          
-          <div class="absolute right-1.5 top-1.5 bottom-1.5 flex items-center">
-            <button type="submit" [disabled]="!userInput() || isLoading()" class="h-full px-5 bg-emerald-600 text-white rounded-lg text-[11px] font-bold hover:bg-emerald-500 transition-colors disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed flex items-center justify-center tracking-wider shadow-sm uppercase">
-              Send
-            </button>
+      <!-- Input Area -->
+      <div class="absolute bottom-0 w-full p-6 bg-gradient-to-t from-white via-white to-transparent pt-12 z-10">
+        <div class="max-w-3xl mx-auto relative px-2 md:px-0">
+          <form (submit)="sendMessage($event)" class="relative w-full shadow-lg rounded-xl">
+            <input 
+              type="text" 
+              [(ngModel)]="userInput"
+              name="userInput"
+              autocomplete="off"
+              class="w-full pl-6 pr-32 py-4 bg-gray-50 border border-gray-200 rounded-xl focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/10 focus:outline-none text-sm font-sans transition-all" 
+              placeholder="Ask your AI Chef anything..." 
+              [disabled]="isLoading()"
+            />
+            
+            <div class="absolute right-1.5 top-1.5 bottom-1.5 flex items-center">
+              <button type="submit" [disabled]="!userInput() || isLoading()" class="h-full px-5 bg-emerald-600 text-white rounded-lg text-[11px] font-bold hover:bg-emerald-500 transition-colors disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed flex items-center justify-center tracking-wider shadow-sm uppercase">
+                Send
+              </button>
+            </div>
+          </form>
+          <div class="mt-3 flex justify-center items-center gap-1.5 text-center text-[10px] text-gray-400 uppercase tracking-widest font-bold">
+            <span class="material-symbols-outlined text-[12px] text-emerald-500">bolt</span> 
+            <span>Powered by DeepSeek Intelligent Culinary Engine</span>
           </div>
-        </form>
-        <div class="mt-3 flex justify-center items-center gap-1.5 text-center text-[10px] text-gray-400 uppercase tracking-widest font-bold">
-          <span class="material-symbols-outlined text-[12px] text-emerald-500">bolt</span> 
-          <span>Powered by DeepSeek Intelligent Culinary Engine</span>
         </div>
       </div>
-    </div>
+    </div> <!-- End Chat Tab -->
+
+    <!-- Library Tab -->
+    <div [class.hidden]="activeTab() !== 'library'" class="flex-1 overflow-y-auto p-6 md:p-12 pb-24 h-full bg-slate-50 custom-scrollbar">
+      <div class="max-w-5xl mx-auto">
+        <h2 class="text-2xl font-bold text-slate-800 mb-8 flex items-center gap-3">
+          <span class="material-symbols-outlined text-emerald-600 bg-emerald-100 p-2 rounded-lg">menu_book</span>
+          我的菜谱库
+        </h2>
+
+        @if (savedRecipes().length === 0) {
+          <div class="text-center py-20 bg-white rounded-2xl border border-gray-200 shadow-sm">
+            <span class="material-symbols-outlined text-6xl text-gray-300 mb-4 block">receipt_long</span>
+            <p class="text-gray-500 font-medium">还没有收藏任何菜谱</p>
+            <p class="text-sm text-gray-400 mt-2">在对话中生成的满意菜谱可以收藏到这里哦！</p>
+          </div>
+        } @else {
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            @for (recipe of savedRecipes(); track recipe.id) {
+              <div class="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow group flex flex-col sm:flex-row">
+                <div class="sm:w-48 h-48 sm:h-auto relative shrink-0">
+                   <img [src]="recipe.imageUrl" referrerpolicy="no-referrer" class="w-full h-full object-cover"/>
+                   <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent sm:hidden"></div>
+                </div>
+                <div class="p-5 flex-1 flex flex-col">
+                  <div class="flex justify-between items-start mb-2">
+                    <h3 class="text-lg font-bold text-slate-800">{{ recipe.name }}</h3>
+                    <button (click)="removeRecipe(recipe.id)" class="text-gray-400 hover:text-rose-500 transition-colors p-1" title="移除">
+                      <span class="material-symbols-outlined text-[20px]">delete</span>
+                    </button>
+                  </div>
+                  <div class="flex gap-2 mb-4 flex-wrap">
+                    <span class="bg-emerald-50 text-emerald-700 text-[10px] font-bold px-2 py-0.5 rounded border border-emerald-100 flex items-center gap-1">
+                      <span class="material-symbols-outlined text-[12px]">timer</span> {{ recipe.time }}
+                    </span>
+                    <span class="bg-orange-50 text-orange-700 text-[10px] font-bold px-2 py-0.5 rounded border border-orange-100 flex items-center gap-1">
+                      <span class="material-symbols-outlined text-[12px]">local_fire_department</span> {{ recipe.calories }} kcal
+                    </span>
+                  </div>
+                  
+                  <div class="text-sm text-gray-600 mb-4 line-clamp-2">{{ recipe.reason }}</div>
+                  
+                  <div class="mt-auto pt-4 border-t border-gray-100">
+                    <p class="text-xs font-bold text-gray-500 mb-2">主要食材</p>
+                    <p class="text-sm text-slate-700 truncate">
+                      {{ recipe.ingredients.map(i => i.name).join(', ') }}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </div> <!-- End Library Tab -->
+
+    <!-- Pantry Tab -->
+    <div [class.hidden]="activeTab() !== 'pantry'" class="flex-1 overflow-y-auto p-6 md:p-12 pb-24 h-full bg-slate-50 custom-scrollbar">
+      <div class="max-w-4xl mx-auto">
+        <h2 class="text-2xl font-bold text-slate-800 mb-8 flex items-center gap-3">
+          <span class="material-symbols-outlined text-orange-500 bg-orange-100 p-2 rounded-lg">kitchen</span>
+          我的食材库
+        </h2>
+
+        <div class="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm mb-8">
+          <h3 class="text-sm font-bold text-gray-700 mb-4">添加新食材</h3>
+          <div class="flex flex-col sm:flex-row gap-4 items-end">
+            <div class="flex-1 w-full">
+              <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">食材名称</label>
+              <input type="text" [(ngModel)]="newPantryItemName" placeholder="如: 西红柿" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/10 outline-none text-sm transition-all">
+            </div>
+            <div class="w-full sm:w-48">
+              <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">数量 (选填)</label>
+              <input type="text" [(ngModel)]="newPantryItemAmount" placeholder="如: 3个 或 500g" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/10 outline-none text-sm transition-all">
+            </div>
+            <button (click)="addPantryItem()" [disabled]="!newPantryItemName().trim()" class="w-full sm:w-auto px-6 py-2.5 bg-emerald-600 text-white font-bold text-sm rounded-xl hover:bg-emerald-700 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed">
+              添加
+            </button>
+          </div>
+        </div>
+
+        @if (pantryItems().length === 0) {
+          <div class="text-center py-16">
+            <p class="text-gray-500 font-medium">食材库空空如也，快添加一些吧！</p>
+          </div>
+        } @else {
+          <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            @for (item of pantryItems(); track item.id) {
+              <div class="bg-white border border-gray-200 p-4 rounded-xl shadow-sm flex items-start justify-between group hover:border-emerald-300 transition-colors">
+                <div>
+                  <h4 class="font-bold text-slate-800">{{ item.name }}</h4>
+                  <p class="text-xs text-gray-500 mt-1 font-mono bg-gray-100 inline-block px-1.5 rounded">{{ item.amount || '若干' }}</p>
+                </div>
+                <button (click)="removePantryItem(item.id)" class="text-gray-300 hover:text-rose-500 transition-colors opacity-0 group-hover:opacity-100">
+                  <span class="material-symbols-outlined text-[18px]">close</span>
+                </button>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </div> <!-- End Pantry Tab -->
+
   </section>
 </main>
 
