@@ -34,6 +34,7 @@ export class App implements AfterViewChecked, OnInit {
   
   newPantryItemName = signal('');
   newPantryItemAmount = signal('');
+  editingPantryId = signal<string | null>(null);
   
   tempProfile: Omit<UserProfile, 'isLoggedIn'> = {
     name: '',
@@ -111,20 +112,45 @@ export class App implements AfterViewChecked, OnInit {
   addPantryItem() {
     const name = this.newPantryItemName().trim();
     const amount = this.newPantryItemAmount().trim();
+    const editId = this.editingPantryId();
+    
     if (name) {
-      this.pantryItems.update(items => [
-        { id: Date.now().toString(), name, amount, addedAt: Date.now() },
-        ...items
-      ]);
+      if (editId) {
+        this.pantryItems.update(items => items.map(i => i.id === editId ? { ...i, name, amount } : i));
+        this.editingPantryId.set(null);
+      } else {
+        this.pantryItems.update(items => [
+          { id: Date.now().toString(), name, amount, addedAt: Date.now() },
+          ...items
+        ]);
+      }
       this.newPantryItemName.set('');
       this.newPantryItemAmount.set('');
       this.savePantry();
     }
   }
 
+  editPantryItem(item: PantryItem) {
+    this.newPantryItemName.set(item.name);
+    this.newPantryItemAmount.set(item.amount);
+    this.editingPantryId.set(item.id);
+  }
+
+  cancelEditPantry() {
+    this.newPantryItemName.set('');
+    this.newPantryItemAmount.set('');
+    this.editingPantryId.set(null);
+  }
+
   removePantryItem(id: string) {
     this.pantryItems.update(items => items.filter(i => i.id !== id));
     this.savePantry();
+  }
+
+  startNewChat() {
+    this.chatService.clearMessages();
+    this.activeTab.set('chat');
+    this.sidebarOpen.set(false);
   }
 
   ngAfterViewChecked() {

@@ -50,6 +50,11 @@ export class ChatService {
     }
   }
 
+  clearMessages() {
+    this.messages.set(this.DEFAULT_MESSAGES);
+    this.saveMessages(this.DEFAULT_MESSAGES);
+  }
+
   async sendMessage(content: string, profile?: any) {
     // Add user message optimistically
     const userMsg: Message = {

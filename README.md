@@ -1,20 +1,59 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# 科学吃饭 DeepChef
 
-# Run and deploy your AI Studio app
+DeepChef 是一个由人工智能驱动的私人厨师与饮食健康管理助手。它通过自然的对话方式，根据用户的饮食偏好、健康目标以及现有的食材，为你量身定制健康、美味的专属食谱。
 
-This contains everything you need to run your app locally.
+本项目使用 **Angular** (前后端同构体系) 结合 **Tailwind CSS** 构建，服务端无缝集成 AI 接口 (DeepSeek 或 Gemini)。所有用户的对话记录、收藏的菜谱库、食材管理均保存在本地浏览器缓存 (LocalStorage) 中，既兼顾了快速响应，又保护了隐私，不会在多用户之间产生数据冲突。
 
-View your app in AI Studio: https://ai.studio/apps/b36aa0a6-7018-4ef3-8f10-1bcf069660db
+## 🌟 核心功能
 
-## Run Locally
+- **智能厨师对话引擎**: 随时向 AI 厨师询问“晚餐吃什么”、“有什么减脂餐”、“我有西红柿和鸡蛋怎么做”，他会提供定制选项或直出食谱。
+- **个人偏好设置库**: 在应用中设定你的“称谓/昵称”、家庭就餐人数、最爱的食物以及忌口/风味要求。这些信息会在每次对话时传递给大模型，让菜谱推荐更加深懂你心。
+- **我的食材管理库 (Pantry)**: 将冰箱里现有的食材登记进去，AI 会在为你构思菜谱时优先使用这些食材组合。支持增加、修改、删除。
+- **我的专属菜谱库**: 对话中遇到令你心动的菜谱，一键“收藏菜谱”即可永久留在菜谱库中反复查看，随时烹饪。
+- **完全本地化存储**: 数据自动保存在 LocalStorage，安全无忧，不同设备或不同浏览器的用户互不干扰。
 
-**Prerequisites:**  Node.js
+## 🚀 如何部署应用
 
+本项目完美支持在 **Vercel** 等 Serverless 平台上进行一键部署。由于使用了 Angular 的服务端渲染架构，Vercel 会自动识别并构建。
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+1. 将当前代码仓库推送到你的 GitHub。
+2. 登录 [Vercel](https://vercel.com/)，点击 **Add New -> Project**。
+3. 选择你的项目仓库并导入。
+4. **最重要的一步：配置环境变量 (Environment Variables)** 
+   在 Vercel 部署前，在 Environment Variables 区域添加你的 API Key。
+
+## 🔑 配置 API Key
+
+系统支持 **DeepSeek**（首选推荐使用，推理能力极佳）或 **Gemini** 作为大语言模型的大脑。你必须在环境变量中配置至少其中一个：
+
+**如果你想使用 DeepSeek:**
+请添加环境变量：
+`DEEPSEEK_API_KEY=你的_deepseek_api_key`
+*(只要系统检测到此环境变量，便会自动优先走 DeepSeek 线路。推荐使用 `deepseek-chat` 模型)*
+
+**如果你想使用 Gemini:**
+请添加环境变量（如果使用谷歌默认线路）：
+`GEMINI_API_KEY=你的_gemini_api_key`
+
+*提示: 如果是在本地开发环境，可以复制根目录的 `.env.example` 文件命名为 `.env`，填入对应的值。*
+
+## 🧠 设定与调整 LLM 的行为准则
+
+AI 厨师的性格、回答的格式乃至他的业务逻辑都可以通过修改 System Instruction 进行定制。
+
+要定制他的行为：
+1. 打开文件 `api/chat.ts`
+2. 找到 `SYSTEM_INSTRUCTION` 常量块
+3. 在这个区域内，你可以使用自然语言命令修改他的语气（例如：“你是一个说话幽默的四川大厨”），调整必须遵守的 JSON 输出格式字典，或是设定新的回答规则。
+这里的修改直接决定了整个应用的大脑运作方式。
+
+## 🛠 如何扩展新功能
+
+由于项目结构清晰并采用标准化的 Angular 框架构建：
+
+- **增加新模块（例如，饮食记录本）**：
+  在 `src/app/` 目录下创建新的视图逻辑。在 `app.html` 的 Tabs（导航栏和主区域）里增加你的新页面入口与面板结构即可。
+- **优化与修改页面样式**：
+  直接在 `src/app/app.html` 和各对应的组件里灵活使用 **Tailwind CSS** 的类名 (如 `bg-emerald-50`, `rounded-2xl` 等) 进行即时调整。
+- **增加复杂的数据结构**：
+  若你希望应用能同步多端数据（而不仅限于 LocalStorage），你可以考虑通过修改 `src/app/chat.service.ts` 或在应用中接入 Firebase/Supabase，配合增加对应的 API 接口 `/api/xxx` 来实现真正的读写同步。并在 `src/app/app.ts` 中将对于 LocalStorage 的读写 `localStorage.getItem/setItem` 替换给相应的网络请求。
