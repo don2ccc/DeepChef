@@ -26,6 +26,7 @@ export class App implements AfterViewChecked, OnInit {
   });
 
   showProfileModal = signal(false);
+  sidebarOpen = signal(false);
 
   activeTab = signal<'chat' | 'library' | 'pantry'>('chat');
   savedRecipes = signal<SavedRecipe[]>([]);
