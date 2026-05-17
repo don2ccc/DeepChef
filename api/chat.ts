@@ -3,7 +3,7 @@ import { OpenAI } from 'openai';
 
 let gemini: GoogleGenAI | null = null;
 let deepseek: OpenAI | null = null;
-let nvidia: OpenAI | null = null;
+let openrouter: OpenAI | null = null;
 
 const SYSTEM_INSTRUCTION = `
 You are a Kitchen Wizard, a professional AI Chef. 
@@ -65,32 +65,32 @@ export default async function handler(req: any, res: any) {
 
     let profileContext = "";
     if (profile) {
-      profileContext += `\nUser Settings:\n- Language setting: ${profile.language === 'en' ? 'English' : 'Chinese'}. You MUST reply in this language.\n`;
+      profileContext += \`\\nUser Settings:\\n- Language setting: \${profile.language === 'en' ? 'English' : 'Chinese'}. You MUST reply in this language.\\n\`;
     }
     if (profile && profile.isLoggedIn) {
-      profileContext += `
+      profileContext += \`
 User Profile (Use this to tailor your recipes):
-- Family members/portion size: ${profile.familyMembers || '1'}
-- Favorite Foods: ${profile.favoriteFoods || 'None specified'}
-- Flavor Preferences & Dietary Restrictions: ${profile.flavorPreferences || 'None specified'}
-`;
+- Family members/portion size: \${profile.familyMembers || '1'}
+- Favorite Foods: \${profile.favoriteFoods || 'None specified'}
+- Flavor Preferences & Dietary Restrictions: \${profile.flavorPreferences || 'None specified'}
+\`;
     }
 
     if (profile && profile.pantry && profile.pantry.length > 0) {
-      const pantryString = profile.pantry.map((item: any) => `${item.name} (${item.amount || '若干'})`).join(', ');
-      profileContext += `\nThe user currently has these ingredients in their pantry: ${pantryString}. Prioritize these if they ask what to cook using what they have.`;
+      const pantryString = profile.pantry.map((item: any) => \`\${item.name} (\${item.amount || '若干'})\`).join(', ');
+      profileContext += \`\\nThe user currently has these ingredients in their pantry: \${pantryString}. Prioritize these if they ask what to cook using what they have.\`;
     }
 
-    const systemInstructionWithProfile = SYSTEM_INSTRUCTION + "\n" + profileContext;
+    const systemInstructionWithProfile = SYSTEM_INSTRUCTION + "\\n" + profileContext;
 
     let resultJson = "";
 
-    if (process.env['NVIDIA_API_KEY'] && process.env['NVIDIA_API_KEY'] !== '') {
-      // Use Nvidia NIM
-      if (!nvidia) {
-        nvidia = new OpenAI({
-          baseURL: 'https://integrate.api.nvidia.com/v1',
-          apiKey: process.env['NVIDIA_API_KEY']
+    if (process.env['OPENROUTER_API_KEY'] && process.env['OPENROUTER_API_KEY'] !== '') {
+      // Use OpenRouter
+      if (!openrouter) {
+        openrouter = new OpenAI({
+          baseURL: 'https://openrouter.ai/api/v1',
+          apiKey: process.env['OPENROUTER_API_KEY']
         });
       }
 
@@ -103,24 +103,21 @@ User Profile (Use this to tailor your recipes):
       ];
       
       const requestOptions: any = {
-        model: 'minimaxai/minimax-m2.7',
+        model: 'meta-llama/llama-3.3-70b-instruct:free',
         messages: messages as OpenAI.Chat.ChatCompletionMessageParam[],
-        temperature: 1,
-        top_p: 0.95,
-        max_tokens: 8192
+        response_format: { type: 'json_object' }
       };
 
-      const response = await nvidia.chat.completions.create(requestOptions);
+      const response = await openrouter.chat.completions.create(requestOptions);
       
       const choiceMsg = response.choices[0].message as any;
       let rawContent = choiceMsg.content || '{}';
 
-      // Extract JSON
-      const jsonMatch = rawContent.match(/```(?:json)?\s*([\s\S]+?)\s*```/);
+      const jsonMatch = rawContent.match(/\\`\\`\\`(?:json)?\\s*([\\s\\S]+?)\\s*\\`\\`\\`/);
       if (jsonMatch) {
          resultJson = jsonMatch[1];
       } else {
-         const curlyMatch = rawContent.match(/\{[\s\S]*\}/);
+         const curlyMatch = rawContent.match(/\\{[\\s\\S]*\\}/);
          if (curlyMatch) {
             resultJson = curlyMatch[0];
          } else {
@@ -155,11 +152,11 @@ User Profile (Use this to tailor your recipes):
       const choiceMsg = response.choices[0].message as any;
       let rawContent = choiceMsg.content || '{}';
 
-      const jsonMatch = rawContent.match(/```(?:json)?\s*([\s\S]+?)\s*```/);
+      const jsonMatch = rawContent.match(/\\`\\`\\`(?:json)?\\s*([\\s\\S]+?)\\s*\\`\\`\\`/);
       if (jsonMatch) {
          resultJson = jsonMatch[1];
       } else {
-         const curlyMatch = rawContent.match(/\{[\s\S]*\}/);
+         const curlyMatch = rawContent.match(/\\{[\\s\\S]*\\}/);
          if (curlyMatch) {
             resultJson = curlyMatch[0];
          } else {
@@ -168,7 +165,7 @@ User Profile (Use this to tailor your recipes):
       }
     } else {
       if (!process.env['GEMINI_API_KEY'] || process.env['GEMINI_API_KEY'] === 'MY_GEMINI_API_KEY') {
-        throw new Error('Please set NVIDIA_API_KEY, DEEPSEEK_API_KEY or verify your GEMINI_API_KEY.');
+        throw new Error('Please set OPENROUTER_API_KEY, DEEPSEEK_API_KEY, or verify your GEMINI_API_KEY in AI Studio Settings.');
       }
       if (!gemini) {
         gemini = new GoogleGenAI({ apiKey: process.env['GEMINI_API_KEY'] });
