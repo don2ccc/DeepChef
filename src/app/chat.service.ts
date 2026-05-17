@@ -13,14 +13,20 @@ const supabaseUrl = ''; // Configured in backend or loaded somehow if we needed 
   providedIn: 'root'
 })
 export class ChatService {
-  private readonly DEFAULT_MESSAGES: Message[] = [
-    {
-      id: '1',
-      role: 'chef',
-      content: '今天想吃点什么？告诉我你的冰箱里有什么食材。',
-      type: 'text'
+  getDefaultMessage(): Message[] {
+    let lang = 'zh';
+    if (typeof localStorage !== 'undefined') {
+      lang = localStorage.getItem('deepchef_lang') || 'zh';
     }
-  ];
+    return [
+      {
+        id: '1',
+        role: 'chef',
+        content: lang === 'zh' ? '今天想吃点什么？' : 'What would you like to eat today?',
+        type: 'text'
+      }
+    ];
+  }
 
   messages = signal<Message[]>([]);
   isLoading = signal<boolean>(false);
@@ -35,10 +41,10 @@ export class ChatService {
       if (saved) {
         this.messages.set(JSON.parse(saved));
       } else {
-        this.messages.set(this.DEFAULT_MESSAGES);
+        this.messages.set(this.getDefaultMessage());
       }
     } catch {
-      this.messages.set(this.DEFAULT_MESSAGES);
+      this.messages.set(this.getDefaultMessage());
     }
   }
 
@@ -51,8 +57,8 @@ export class ChatService {
   }
 
   clearMessages() {
-    this.messages.set(this.DEFAULT_MESSAGES);
-    this.saveMessages(this.DEFAULT_MESSAGES);
+    this.messages.set(this.getDefaultMessage());
+    this.saveMessages(this.getDefaultMessage());
   }
 
   loadMessagesFromHistory(msgs: Message[]) {
@@ -60,7 +66,7 @@ export class ChatService {
     this.saveMessages(msgs);
   }
 
-  async sendMessage(content: string, profile?: any, useReasoning: boolean = false, audioUrl?: string) {
+  async sendMessage(content: string, profile?: any, audioUrl?: string) {
     // Add user message optimistically
     const userMsg: Message = {
       id: Date.now().toString(),
@@ -82,8 +88,7 @@ export class ChatService {
       const response = await firstValueFrom(
         this.http.post<{ message: Message }>('/api/chat', { 
           history: this.messages(),
-          profile,
-          useReasoning
+          profile
         })
       );
       

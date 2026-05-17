@@ -3,10 +3,12 @@ import { OpenAI } from 'openai';
 
 let gemini: GoogleGenAI | null = null;
 let deepseek: OpenAI | null = null;
+let nvidia: OpenAI | null = null;
 
 const SYSTEM_INSTRUCTION = `
 You are a Kitchen Wizard, a professional AI Chef. 
 The user will tell you what ingredients they have or what they want to eat.
+You MUST respond in the language specified in the user profile's \`language\` (either 'zh' for Chinese or 'en' for English).
 You must respond with JSON EXACTLY matching this structure, with no markdown formatting around it:
 {
   "role": "chef",
@@ -16,7 +18,7 @@ You must respond with JSON EXACTLY matching this structure, with no markdown for
   "recipe": {
     "name": "Recipe Name",
     "imageUrl": "A descriptive image URL or placeholder, e.g. https://images.unsplash.com/photo-XXX",
-    "time": "15分钟",
+    "time": "15分钟 / 15 mins",
     "tags": ["高蛋白", "低脂"],
     "calories": 320,
     "protein": 28,
@@ -53,7 +55,7 @@ export default async function handler(req: any, res: any) {
   }
 
   try {
-    const { history, profile, useReasoning } = req.body;
+    const { history, profile } = req.body;
     
     // Format history for the API
     const formattedHistory = history.map((msg: { role: string, content: string }) => ({
@@ -62,8 +64,11 @@ export default async function handler(req: any, res: any) {
     }));
 
     let profileContext = "";
+    if (profile) {
+      profileContext += `\nUser Settings:\n- Language setting: ${profile.language === 'en' ? 'English' : 'Chinese'}. You MUST reply in this language.\n`;
+    }
     if (profile && profile.isLoggedIn) {
-      profileContext = `
+      profileContext += `
 User Profile (Use this to tailor your recipes):
 - Family members/portion size: ${profile.familyMembers || '1'}
 - Favorite Foods: ${profile.favoriteFoods || 'None specified'}
@@ -79,9 +84,50 @@ User Profile (Use this to tailor your recipes):
     const systemInstructionWithProfile = SYSTEM_INSTRUCTION + "\n" + profileContext;
 
     let resultJson = "";
-    let reasoningContent = "";
 
-    if (process.env['DEEPSEEK_API_KEY'] && process.env['DEEPSEEK_API_KEY'] !== '') {
+    if (process.env['NVIDIA_API_KEY'] && process.env['NVIDIA_API_KEY'] !== '') {
+      // Use Nvidia NIM
+      if (!nvidia) {
+        nvidia = new OpenAI({
+          baseURL: 'https://integrate.api.nvidia.com/v1',
+          apiKey: process.env['NVIDIA_API_KEY']
+        });
+      }
+
+      const messages = [
+        { role: 'system', content: systemInstructionWithProfile },
+        ...formattedHistory.map((msg: { role: string, content: string }) => ({
+          role: msg.role === 'model' ? 'assistant' : 'user',
+          content: msg.content
+        }))
+      ];
+      
+      const requestOptions: any = {
+        model: 'minimaxai/minimax-m2.7',
+        messages: messages as OpenAI.Chat.ChatCompletionMessageParam[],
+        temperature: 1,
+        top_p: 0.95,
+        max_tokens: 8192
+      };
+
+      const response = await nvidia.chat.completions.create(requestOptions);
+      
+      const choiceMsg = response.choices[0].message as any;
+      let rawContent = choiceMsg.content || '{}';
+
+      // Extract JSON
+      const jsonMatch = rawContent.match(/```(?:json)?\s*([\s\S]+?)\s*```/);
+      if (jsonMatch) {
+         resultJson = jsonMatch[1];
+      } else {
+         const curlyMatch = rawContent.match(/\{[\s\S]*\}/);
+         if (curlyMatch) {
+            resultJson = curlyMatch[0];
+         } else {
+            resultJson = rawContent;
+         }
+      }
+    } else if (process.env['DEEPSEEK_API_KEY'] && process.env['DEEPSEEK_API_KEY'] !== '') {
       // Use DeepSeek
       if (!deepseek) {
         deepseek = new OpenAI({
@@ -98,23 +144,17 @@ User Profile (Use this to tailor your recipes):
         }))
       ];
       
-      const modelToUse = useReasoning ? 'deepseek-reasoner' : 'deepseek-chat';
       const requestOptions: any = {
-        model: modelToUse,
-        messages: messages as OpenAI.Chat.ChatCompletionMessageParam[]
+        model: 'deepseek-chat',
+        messages: messages as OpenAI.Chat.ChatCompletionMessageParam[],
+        response_format: { type: 'json_object' }
       };
-      
-      if (!useReasoning) {
-        requestOptions.response_format = { type: 'json_object' };
-      }
 
       const response = await deepseek.chat.completions.create(requestOptions);
       
       const choiceMsg = response.choices[0].message as any;
       let rawContent = choiceMsg.content || '{}';
-      reasoningContent = choiceMsg.reasoning_content || '';
 
-      // Extract JSON using regex if reasoning mode (which doesn't enforce json object)
       const jsonMatch = rawContent.match(/```(?:json)?\s*([\s\S]+?)\s*```/);
       if (jsonMatch) {
          resultJson = jsonMatch[1];
@@ -128,7 +168,7 @@ User Profile (Use this to tailor your recipes):
       }
     } else {
       if (!process.env['GEMINI_API_KEY'] || process.env['GEMINI_API_KEY'] === 'MY_GEMINI_API_KEY') {
-        throw new Error('Please set DEEPSEEK_API_KEY in .env, or verify your GEMINI_API_KEY in AI Studio Settings.');
+        throw new Error('Please set NVIDIA_API_KEY, DEEPSEEK_API_KEY or verify your GEMINI_API_KEY.');
       }
       if (!gemini) {
         gemini = new GoogleGenAI({ apiKey: process.env['GEMINI_API_KEY'] });
@@ -152,9 +192,6 @@ User Profile (Use this to tailor your recipes):
 
     const message = JSON.parse(resultJson);
     message.id = Date.now().toString();
-    if (reasoningContent) {
-      message.reasoning = reasoningContent;
-    }
     
     // Default image if missing or using Unsplash
     if (message.recipe && (!message.recipe.imageUrl || !message.recipe.imageUrl.startsWith('http'))) {

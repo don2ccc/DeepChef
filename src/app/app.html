@@ -7,22 +7,25 @@
       </button>
       <div class="flex items-center gap-2 text-emerald-600 font-bold text-lg md:text-xl tracking-tight cursor-pointer active:scale-95 transition-transform" (click)="activeTab.set('chat'); sidebarOpen.set(false)">
         <span class="material-symbols-outlined">restaurant</span>
-        <span class="hidden sm:inline">科学吃饭 DeepChef</span>
-        <span class="sm:hidden text-lg">科学吃饭</span>
+        <span class="hidden sm:inline">{{ t('appTitle') }}</span>
+        <span class="sm:hidden text-lg">{{ t('appTitle').split(' ').pop() }}</span>
       </div>
     </div>
     <nav class="hidden md:flex gap-6 items-center">
       <a class="cursor-pointer text-sm font-sans transition-colors duration-200" 
          [class]="activeTab() === 'chat' ? 'text-emerald-700 font-bold border-b-2 border-emerald-600 pb-1' : 'text-gray-500 font-medium hover:text-gray-900'"
-         (click)="activeTab.set('chat')">对话</a>
+         (click)="activeTab.set('chat')">{{ t('tabChat') }}</a>
       <a class="cursor-pointer text-sm font-sans transition-colors duration-200" 
          [class]="activeTab() === 'library' ? 'text-emerald-700 font-bold border-b-2 border-emerald-600 pb-1' : 'text-gray-500 font-medium hover:text-gray-900'"
-         (click)="activeTab.set('library')">菜谱库</a>
+         (click)="activeTab.set('library')">{{ t('tabLibrary') }}</a>
       <a class="cursor-pointer text-sm font-sans transition-colors duration-200" 
          [class]="activeTab() === 'pantry' ? 'text-emerald-700 font-bold border-b-2 border-emerald-600 pb-1' : 'text-gray-500 font-medium hover:text-gray-900'"
-         (click)="activeTab.set('pantry')">食材管理</a>
+         (click)="activeTab.set('pantry')">{{ t('tabPantry') }}</a>
     </nav>
     <div class="flex items-center gap-4">
+      <button (click)="toggleLang()" class="text-sm font-bold text-gray-500 hover:text-emerald-600 transition-colors uppercase tracking-wider px-2 py-1 rounded-md border border-gray-200">
+        {{ lang() === 'zh' ? 'EN' : '中' }}
+      </button>
       <div class="flex items-center gap-2 text-xs text-gray-400 font-medium hidden sm:flex">
         DEPLOYED ON <span class="font-bold text-black tracking-widest px-2 py-1 bg-gray-100 rounded border border-gray-200">VERCEL</span>
       </div>
@@ -47,28 +50,28 @@
       <a class="cursor-pointer px-3 py-2 text-sm font-bold flex items-center gap-3 rounded-lg transition-colors" 
          [class]="activeTab() === 'chat' ? 'bg-emerald-50 text-emerald-700' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'"
          (click)="activeTab.set('chat'); sidebarOpen.set(false)">
-         <span class="material-symbols-outlined text-[20px]">chat</span> 对话
+         <span class="material-symbols-outlined text-[20px]">chat</span> {{ t('tabChat') }}
       </a>
       <a class="cursor-pointer px-3 py-2 text-sm font-bold flex items-center gap-3 rounded-lg transition-colors" 
          [class]="activeTab() === 'library' ? 'bg-emerald-50 text-emerald-700' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'"
          (click)="activeTab.set('library'); sidebarOpen.set(false)">
-         <span class="material-symbols-outlined text-[20px]">menu_book</span> 菜谱库
+         <span class="material-symbols-outlined text-[20px]">menu_book</span> {{ t('tabLibrary') }}
       </a>
       <a class="cursor-pointer px-3 py-2 text-sm font-bold flex items-center gap-3 rounded-lg transition-colors" 
          [class]="activeTab() === 'pantry' ? 'bg-emerald-50 text-emerald-700' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'"
          (click)="activeTab.set('pantry'); sidebarOpen.set(false)">
-         <span class="material-symbols-outlined text-[20px]">kitchen</span> 食材管理
+         <span class="material-symbols-outlined text-[20px]">kitchen</span> {{ t('tabPantry') }}
       </a>
     </div>
 
     <div class="p-6">
       <button (click)="startNewChat()" class="w-full flex items-center justify-center gap-2 bg-emerald-50 text-emerald-700 py-2.5 px-4 rounded-lg text-sm font-bold hover:bg-emerald-100 transition-colors border border-emerald-100">
         <span class="material-symbols-outlined text-[18px]">add</span>
-        <span>新的对话</span>
+        <span>{{ t('newChat') }}</span>
       </button>
     </div>
     <div class="flex-1 overflow-y-auto px-4 pb-4 custom-scrollbar">
-      <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 px-2">History</h3>
+      <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 px-2">{{ t('history') }}</h3>
       <div class="space-y-1">
         @if (pastSessions().length > 0) {
           @for (session of pastSessions(); track session.id) {
@@ -79,7 +82,7 @@
             </button>
           }
         } @else {
-          <p class="px-3 py-2 text-sm text-gray-400">暂无历史记录</p>
+          <p class="px-3 py-2 text-sm text-gray-400">{{ t('noHistory') }}</p>
         }
       </div>
     </div>
@@ -90,15 +93,15 @@
             <div class="w-8 h-8 rounded-full bg-emerald-600 flex items-center justify-center text-white font-bold text-xs shadow-inner shrink-0">{{ userProfile().name.charAt(0) }}</div>
             <div class="flex-1 overflow-hidden">
               <p class="text-xs font-bold text-gray-900 truncate">{{ userProfile().name }}</p>
-              <p class="text-[10px] text-emerald-600 truncate uppercase tracking-tighter font-bold">已开启私人厨房体验 · 齿轮修改</p>
+              <p class="text-[10px] text-emerald-600 truncate uppercase tracking-tighter font-bold">{{ t('chefActiveTitle') }}</p>
             </div>
           } @else {
             <div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 font-bold text-xs shadow-inner shrink-0">
               <span class="material-symbols-outlined text-[16px]">tune</span>
             </div>
             <div class="flex-1 overflow-hidden">
-              <p class="text-xs font-bold text-gray-900 truncate">默认大厨</p>
-              <p class="text-[10px] text-gray-500 truncate uppercase tracking-tighter">设置名称与偏好</p>
+              <p class="text-xs font-bold text-gray-900 truncate">{{ t('chefDefault') }}</p>
+              <p class="text-[10px] text-gray-500 truncate uppercase tracking-tighter">{{ t('chefSettings') }}</p>
             </div>
           }
         </div>
@@ -163,15 +166,15 @@
                     <!-- Macros -->
                     <div class="grid grid-cols-3 gap-4 py-4 border-y border-gray-100">
                       <div>
-                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Calories</p>
+                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">{{ t('calories') }}</p>
                         <p class="text-slate-900 font-mono font-bold text-lg tracking-tight">{{ message.recipe.calories || '--' }} <span class="text-xs font-sans text-gray-500 font-normal">kcal</span></p>
                       </div>
                       <div>
-                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Protein</p>
+                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">{{ t('protein') }}</p>
                         <p class="text-slate-900 font-mono font-bold text-lg tracking-tight">{{ message.recipe.protein || '--' }} <span class="text-xs font-sans text-gray-500 font-normal">g</span></p>
                       </div>
                       <div>
-                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Carbs</p>
+                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">{{ t('carbs') }}</p>
                         <p class="text-slate-900 font-mono font-bold text-lg tracking-tight">{{ message.recipe.carbs || '--' }} <span class="text-xs font-sans text-gray-500 font-normal">g</span></p>
                       </div>
                     </div>
@@ -179,7 +182,7 @@
                     <!-- Reason -->
                     <div class="bg-indigo-50 border border-indigo-100/60 p-4 rounded-xl shadow-sm">
                       <p class="text-[11px] font-bold text-indigo-800 uppercase tracking-widest flex items-center gap-2 mb-2">
-                        <span class="material-symbols-outlined text-[16px]">info</span> Why this recipe?
+                        <span class="material-symbols-outlined text-[16px]">info</span> {{ t('whyRecipe') }}
                       </p>
                       <p class="text-sm text-indigo-900/80 leading-relaxed font-medium">
                         {{ message.recipe.reason }}
@@ -188,7 +191,7 @@
 
                     <!-- Ingredients -->
                     <div class="space-y-3">
-                      <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Ingredients</p>
+                      <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">{{ t('ingredients') }}</p>
                       <div class="grid grid-cols-2 gap-x-4 gap-y-3 p-5 bg-gray-50 rounded-xl border border-gray-100 shadow-inner">
                         @for (ingredient of message.recipe.ingredients; track ingredient.name) {
                           <div class="flex justify-between items-center text-sm border-b border-gray-200/50 pb-1 last:border-0 last:pb-0">
@@ -201,7 +204,7 @@
 
                     <!-- Steps -->
                     <div class="space-y-4 pt-2">
-                      <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Instructions</p>
+                      <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">{{ t('instructions') }}</p>
                       <ul class="space-y-4">
                         @for (step of message.recipe.steps; track step; let i = $index) {
                           <li class="flex gap-4">
@@ -217,16 +220,16 @@
                       <div class="flex items-center gap-2">
                         @if (isRecipeSaved(message.recipe.name)) {
                           <button class="px-3 py-1.5 rounded bg-gray-100 text-gray-500 text-xs font-bold flex items-center gap-1 shadow-sm cursor-default">
-                            <span class="material-symbols-outlined text-[14px]">check</span> 已收藏
+                            <span class="material-symbols-outlined text-[14px]">check</span> {{ t('saved') }}
                           </button>
                         } @else {
                           <button (click)="addRecipeToLibrary(message.recipe)" class="px-3 py-1.5 rounded bg-emerald-50 text-emerald-600 border border-emerald-200 hover:bg-emerald-100 hover:border-emerald-300 text-xs font-bold transition-colors flex items-center gap-1 shadow-sm">
-                            <span class="material-symbols-outlined text-[14px]">bookmark_add</span> 收藏菜谱
+                            <span class="material-symbols-outlined text-[14px]">bookmark_add</span> {{ t('saveRecipe') }}
                           </button>
                         }
                       </div>
                       <div class="flex items-center gap-2">
-                        <span class="text-xs text-gray-400 font-medium tracking-wide">为您推荐的食谱有帮助吗？</span>
+                        <span class="text-xs text-gray-400 font-medium tracking-wide">{{ t('feedbackPrompt') }}</span>
                         <button (click)="submitFeedback(message.id, 'like')" 
                                 [class.text-emerald-600]="message.feedback === 'like'"
                                 [class.bg-emerald-50]="message.feedback === 'like'"
@@ -292,7 +295,7 @@
               name="userInput"
               autocomplete="off"
               class="w-full pl-6 pr-44 py-4 bg-gray-50 border border-gray-200 rounded-xl focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/10 focus:outline-none text-sm font-sans transition-all" 
-              placeholder="{{ isRecording() ? '正在倾听...' : 'Ask your AI Chef anything...' }}" 
+              placeholder="{{ isRecording() ? t('inputListening') : t('inputPlaceholder') }}" 
               [disabled]="isLoading() && !isRecording()"
             />
             
@@ -301,26 +304,13 @@
                 <span class="material-symbols-outlined">{{ isRecording() ? 'stop_circle' : 'mic' }}</span>
               </button>
               <button type="submit" [disabled]="!userInput() || isLoading() && !isRecording()" class="h-full px-5 bg-emerald-600 text-white rounded-lg text-[11px] font-bold hover:bg-emerald-500 transition-colors disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed flex items-center justify-center tracking-wider shadow-sm uppercase">
-                Send
+                {{ t('send') }}
               </button>
             </div>
           </form>
-          <div class="mt-3 flex justify-between items-center px-1">
-            <label class="flex items-center gap-2 cursor-pointer group">
-              <div class="relative">
-                <input type="checkbox" [(ngModel)]="useReasoning" name="useReasoning" class="sr-only">
-                <div class="block w-10 h-6 bg-gray-200 rounded-full transition-colors group-hover:bg-gray-300" [class.bg-emerald-500]="useReasoning()"></div>
-                <div class="absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform shadow-sm" [class.translate-x-4]="useReasoning()"></div>
-              </div>
-              <span class="text-[11px] font-bold text-gray-500 group-hover:text-gray-700 transition-colors flex items-center gap-1 uppercase tracking-wider">
-                <span class="material-symbols-outlined text-[14px]">psychology</span>
-                深度思考模式 (R1)
-              </span>
-            </label>
-            <div class="flex items-center gap-1.5 text-center text-[10px] text-gray-400 uppercase tracking-widest font-bold">
-              <span class="material-symbols-outlined text-[12px] text-emerald-500">bolt</span> 
-              <span>Powered by DeepChef Engine</span>
-            </div>
+          <div class="mt-3 flex justify-center items-center gap-1.5 text-center text-[10px] text-gray-400 uppercase tracking-widest font-bold">
+            <span class="material-symbols-outlined text-[12px] text-emerald-500">bolt</span> 
+            <span>Powered by DeepChef Engine</span>
           </div>
         </div>
       </div>
@@ -331,14 +321,14 @@
       <div class="max-w-5xl mx-auto">
         <h2 class="text-2xl font-bold text-slate-800 mb-8 flex items-center gap-3">
           <span class="material-symbols-outlined text-emerald-600 bg-emerald-100 p-2 rounded-lg">menu_book</span>
-          我的菜谱库
+          {{ t('libraryTitle') }}
         </h2>
 
         @if (savedRecipes().length === 0) {
           <div class="text-center py-20 bg-white rounded-2xl border border-gray-200 shadow-sm">
             <span class="material-symbols-outlined text-6xl text-gray-300 mb-4 block">receipt_long</span>
-            <p class="text-gray-500 font-medium">还没有收藏任何菜谱</p>
-            <p class="text-sm text-gray-400 mt-2">在对话中生成的满意菜谱可以收藏到这里哦！</p>
+            <p class="text-gray-500 font-medium">{{ t('libraryEmpty') }}</p>
+            <p class="text-sm text-gray-400 mt-2">{{ t('libraryEmptySub') }}</p>
           </div>
         } @else {
           <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -367,7 +357,7 @@
                   <div class="text-sm text-gray-600 mb-4 line-clamp-2">{{ recipe.reason }}</div>
                   
                   <div class="mt-auto pt-4 border-t border-gray-100">
-                    <p class="text-xs font-bold text-gray-500 mb-2">主要食材</p>
+                    <p class="text-xs font-bold text-gray-500 mb-2">{{ t('mainIngredients') }}</p>
                     <p class="text-sm text-slate-700 truncate">
                       {{ recipe.ingredients.map(i => i.name).join(', ') }}
                     </p>
@@ -385,28 +375,28 @@
       <div class="max-w-4xl mx-auto">
         <h2 class="text-2xl font-bold text-slate-800 mb-8 flex items-center gap-3">
           <span class="material-symbols-outlined text-orange-500 bg-orange-100 p-2 rounded-lg">kitchen</span>
-          我的食材库
+          {{ t('pantryTitle') }}
         </h2>
 
         <div class="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm mb-8">
-          <h3 class="text-sm font-bold text-gray-700 mb-4">添加新食材</h3>
+          <h3 class="text-sm font-bold text-gray-700 mb-4">{{ t('addPantryTitle') }}</h3>
           <div class="flex flex-col sm:flex-row gap-4 items-end">
             <div class="flex-1 w-full">
-              <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">食材名称</label>
-              <input type="text" [(ngModel)]="newPantryItemName" placeholder="如: 西红柿" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/10 outline-none text-sm transition-all">
+              <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">{{ t('pantryItemName') }}</label>
+              <input type="text" [(ngModel)]="newPantryItemName" [placeholder]="t('pantryItemNamePlaceholder')" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/10 outline-none text-sm transition-all">
             </div>
             <div class="w-full sm:w-48">
-              <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">数量 (选填)</label>
-              <input type="text" [(ngModel)]="newPantryItemAmount" placeholder="如: 3个 或 500g" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/10 outline-none text-sm transition-all">
+              <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">{{ t('pantryItemAmount') }}</label>
+              <input type="text" [(ngModel)]="newPantryItemAmount" [placeholder]="t('pantryItemAmountPlaceholder')" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/10 outline-none text-sm transition-all">
             </div>
             <div class="flex w-full sm:w-auto gap-2">
               @if (editingPantryId()) {
                 <button (click)="cancelEditPantry()" class="px-6 py-2.5 bg-gray-100 text-gray-600 font-bold text-sm rounded-xl hover:bg-gray-200 transition-colors shadow-sm">
-                  取消
+                  {{ t('cancel') }}
                 </button>
               }
               <button (click)="addPantryItem()" [disabled]="!newPantryItemName().trim()" class="flex-1 sm:flex-auto px-6 py-2.5 bg-emerald-600 text-white font-bold text-sm rounded-xl hover:bg-emerald-700 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed">
-                {{ editingPantryId() ? '保存修改' : '添加' }}
+                {{ editingPantryId() ? t('saveChanges') : t('add') }}
               </button>
             </div>
           </div>
@@ -414,7 +404,7 @@
 
         @if (pantryItems().length === 0) {
           <div class="text-center py-16">
-            <p class="text-gray-500 font-medium">食材库空空如也，快添加一些吧！</p>
+            <p class="text-gray-500 font-medium">{{ t('pantryEmpty') }}</p>
           </div>
         } @else {
           <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -422,7 +412,7 @@
               <div class="bg-white border border-gray-200 p-4 rounded-xl shadow-sm flex items-start justify-between group hover:border-emerald-300 transition-colors">
                 <div>
                   <h4 class="font-bold text-slate-800">{{ item.name }}</h4>
-                  <p class="text-xs text-gray-500 mt-1 font-mono bg-gray-100 inline-block px-1.5 rounded">{{ item.amount || '若干' }}</p>
+                  <p class="text-xs text-gray-500 mt-1 font-mono bg-gray-100 inline-block px-1.5 rounded">{{ item.amount || t('pantryItemAmountFallback') }}</p>
                 </div>
                 <div class="flex gap-1 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity">
                    <button (click)="editPantryItem(item)" class="text-gray-400 hover:text-emerald-600 transition-colors p-1" title="修改">
@@ -451,33 +441,33 @@
       </button>
       <h3 class="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
         <span class="material-symbols-outlined text-emerald-600">tune</span>
-        完善个人偏好库
+        {{ t('profileTitle') }}
       </h3>
       
       <div class="space-y-4">
         <div>
-          <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">您的称谓/昵称</label>
-          <input type="text" [(ngModel)]="tempProfile.name" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/10 outline-none text-sm transition-all" placeholder="例如: 大厨">
+          <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">{{ t('profileName') }}</label>
+          <input type="text" [(ngModel)]="tempProfile.name" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/10 outline-none text-sm transition-all" [placeholder]="t('profileNamePlaceholder')">
         </div>
         <div>
-          <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">家庭就餐人数</label>
-          <input type="number" [(ngModel)]="tempProfile.familyMembers" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/10 outline-none text-sm transition-all" placeholder="例如: 3">
+          <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">{{ t('profileFamily') }}</label>
+          <input type="number" [(ngModel)]="tempProfile.familyMembers" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/10 outline-none text-sm transition-all" [placeholder]="t('profileFamilyPlaceholder')">
         </div>
         <div>
-          <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">偏好食材/最爱吃的</label>
-          <input type="text" [(ngModel)]="tempProfile.favoriteFoods" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/10 outline-none text-sm transition-all" placeholder="例如: 牛肉, 海鲜, 西兰花">
+          <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">{{ t('profileFavorite') }}</label>
+          <input type="text" [(ngModel)]="tempProfile.favoriteFoods" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/10 outline-none text-sm transition-all" [placeholder]="t('profileFavoritePlaceholder')">
         </div>
         <div>
-          <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">口味偏好及忌口</label>
-          <input type="text" [(ngModel)]="tempProfile.flavorPreferences" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/10 outline-none text-sm transition-all" placeholder="例如: 少油少盐, 微辣, 不吃香菜">
+          <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">{{ t('profileFlavor') }}</label>
+          <input type="text" [(ngModel)]="tempProfile.flavorPreferences" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/10 outline-none text-sm transition-all" [placeholder]="t('profileFlavorPlaceholder')">
         </div>
       </div>
       
       <div class="mt-8 flex justify-between items-center">
-        <button (click)="logout()" class="text-xs font-bold text-rose-500 hover:text-rose-600 transition-colors">退出登录</button>
+        <button (click)="logout()" class="text-xs font-bold text-rose-500 hover:text-rose-600 transition-colors">{{ t('logout') }}</button>
         <div class="flex gap-3">
-          <button (click)="showProfileModal.set(false)" class="px-5 py-2.5 text-sm font-bold text-gray-500 hover:bg-gray-100 rounded-lg transition-colors">取消</button>
-          <button (click)="saveProfile()" class="px-4 py-2.5 bg-emerald-600 text-white text-sm font-bold rounded-lg hover:bg-emerald-700 transition-colors shadow-sm">保存并生效</button>
+          <button (click)="showProfileModal.set(false)" class="px-5 py-2.5 text-sm font-bold text-gray-500 hover:bg-gray-100 rounded-lg transition-colors">{{ t('cancel') }}</button>
+          <button (click)="saveProfile()" class="px-4 py-2.5 bg-emerald-600 text-white text-sm font-bold rounded-lg hover:bg-emerald-700 transition-colors shadow-sm">{{ t('saveAndApply') }}</button>
         </div>
       </div>
     </div>

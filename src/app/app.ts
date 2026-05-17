@@ -29,10 +29,90 @@ export class App implements AfterViewChecked, OnInit {
 
   showProfileModal = signal(false);
   sidebarOpen = signal(false);
-  useReasoning = signal(false);
 
   isRecording = signal(false);
   recordingTranscript = signal('');
+
+  lang = signal<'zh' | 'en'>('zh');
+
+  translations: Record<string, Record<'zh' | 'en', string>> = {
+    appTitle: { zh: '科学吃饭 DeepChef', en: 'DeepChef' },
+    tabChat: { zh: '对话', en: 'Chat' },
+    tabLibrary: { zh: '菜谱库', en: 'Recipe Library' },
+    tabPantry: { zh: '食材管理', en: 'Pantry' },
+    newChat: { zh: '新的对话', en: 'New Chat' },
+    history: { zh: '历史记录', en: 'History' },
+    noHistory: { zh: '暂无历史记录', en: 'No history yet' },
+    chefDefault: { zh: '默认大厨', en: 'Default Chef' },
+    chefSettings: { zh: '设置名称与偏好', en: 'Set Name & Preferences' },
+    chefActiveTitle: { zh: '已开启私人厨房体验 · 齿轮修改', en: 'Private Chef Active · Click to Edit' },
+    inputPlaceholder: { zh: 'Ask your AI Chef anything...', en: 'Ask your AI Chef anything...' },
+    inputListening: { zh: '正在倾听...', en: 'Listening...' },
+    send: { zh: '发送', en: 'Send' },
+    libraryTitle: { zh: '我的菜谱库', en: 'My Recipe Library' },
+    libraryEmpty: { zh: '还没有收藏任何菜谱', en: 'No recipes saved yet' },
+    libraryEmptySub: { zh: '在对话中生成的满意菜谱可以收藏到这里哦！', en: 'Satisfying recipes generated in chat can be saved here!' },
+    mainIngredients: { zh: '主要食材', en: 'Main Ingredients' },
+    saved: { zh: '已收藏', en: 'Saved' },
+    saveRecipe: { zh: '收藏菜谱', en: 'Save Recipe' },
+    feedbackPrompt: { zh: '为您推荐的食谱有帮助吗？', en: 'Is this recipe helpful?' },
+    calories: { zh: '卡路里', en: 'Calories' },
+    protein: { zh: '蛋白质', en: 'Protein' },
+    carbs: { zh: '碳水', en: 'Carbs' },
+    whyRecipe: { zh: '为什么推荐这道菜？', en: 'Why this recipe?' },
+    ingredients: { zh: '配料表', en: 'Ingredients' },
+    instructions: { zh: '制作步骤', en: 'Instructions' },
+    pantryTitle: { zh: '我的食材库', en: 'My Pantry' },
+    addPantryTitle: { zh: '添加新食材', en: 'Add New Item' },
+    pantryItemName: { zh: '食材名称', en: 'Item Name' },
+    pantryItemNamePlaceholder: { zh: '如: 西红柿', en: 'e.g. Tomato' },
+    pantryItemAmount: { zh: '数量 (选填)', en: 'Amount (Optional)' },
+    pantryItemAmountPlaceholder: { zh: '如: 3个 或 500g', en: 'e.g. 3 pcs or 500g' },
+    cancel: { zh: '取消', en: 'Cancel' },
+    saveChanges: { zh: '保存修改', en: 'Save Changes' },
+    add: { zh: '添加', en: 'Add' },
+    pantryEmpty: { zh: '食材库空空如也，快添加一些吧！', en: 'Pantry is empty, add some items!' },
+    pantryItemAmountFallback: { zh: '若干', en: 'Some' },
+    profileTitle: { zh: '完善个人偏好库', en: 'Complete Your Profile' },
+    profileName: { zh: '您的称谓/昵称', en: 'Your Name/Nickname' },
+    profileNamePlaceholder: { zh: '例如: 大厨', en: 'e.g. Master Chef' },
+    profileFamily: { zh: '家庭就餐人数', en: 'Family Members (Number)' },
+    profileFamilyPlaceholder: { zh: '例如: 3', en: 'e.g. 3' },
+    profileFavorite: { zh: '偏好食材/最爱吃的', en: 'Favorite Foods' },
+    profileFavoritePlaceholder: { zh: '例如: 牛肉, 海鲜, 西兰花', en: 'e.g. Beef, Seafood, Broccoli' },
+    profileFlavor: { zh: '口味偏好及忌口', en: 'Flavor Preferences & Restrictions' },
+    profileFlavorPlaceholder: { zh: '例如: 少油少盐, 微辣, 不吃香菜', en: 'e.g. Less oil/salt, mildly spicy, no cilantro' },
+    logout: { zh: '退出登录', en: 'Logout' },
+    saveAndApply: { zh: '保存并生效', en: 'Save and Apply' }
+  };
+
+  t(key: string): string {
+    return this.translations[key]?.[this.lang()] || key;
+  }
+
+  toggleLang() {
+    this.lang.set(this.lang() === 'zh' ? 'en' : 'zh');
+    this.saveLang();
+  }
+
+  saveLang() {
+    try {
+      if (typeof localStorage !== 'undefined') {
+        localStorage.setItem('deepchef_lang', this.lang());
+      }
+    } catch {}
+  }
+
+  loadLang() {
+    try {
+      if (typeof localStorage !== 'undefined') {
+        const saved = localStorage.getItem('deepchef_lang') as 'zh' | 'en';
+        if (saved) {
+          this.lang.set(saved);
+        }
+      }
+    } catch {}
+  }
 
   private mediaRecorder: MediaRecorder | null = null;
   private audioChunks: Blob[] = [];
@@ -62,6 +142,7 @@ export class App implements AfterViewChecked, OnInit {
     this.loadLibrary();
     this.loadPantry();
     this.loadSessions();
+    this.loadLang();
   }
 
   loadSessions() {
@@ -272,7 +353,7 @@ export class App implements AfterViewChecked, OnInit {
     }
     const val = this.userInput().trim();
     if (val) {
-      this.chatService.sendMessage(val, { ...this.userProfile(), pantry: this.pantryItems() }, this.useReasoning());
+      this.chatService.sendMessage(val, { ...this.userProfile(), pantry: this.pantryItems(), language: this.lang() });
       this.userInput.set('');
       // Schedule save after angular updates
       setTimeout(() => this.saveCurrentChatToHistory(), 100);
@@ -280,7 +361,7 @@ export class App implements AfterViewChecked, OnInit {
   }
 
   sendOption(option: string) {
-    this.chatService.sendMessage(option, { ...this.userProfile(), pantry: this.pantryItems() }, this.useReasoning());
+    this.chatService.sendMessage(option, { ...this.userProfile(), pantry: this.pantryItems(), language: this.lang() });
     setTimeout(() => this.saveCurrentChatToHistory(), 100);
   }
 
@@ -407,7 +488,7 @@ export class App implements AfterViewChecked, OnInit {
 
   sendVoiceMessage(text: string, audioUrl: string) {
     if (text) {
-      this.chatService.sendMessage(text, { ...this.userProfile(), pantry: this.pantryItems() }, this.useReasoning(), audioUrl);
+      this.chatService.sendMessage(text, { ...this.userProfile(), pantry: this.pantryItems(), language: this.lang() }, audioUrl);
       setTimeout(() => this.saveCurrentChatToHistory(), 100);
     }
   }
