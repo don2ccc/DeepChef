@@ -25,7 +25,6 @@ export class App implements AfterViewChecked, OnInit {
     flavorPreferences: ''
   });
 
-  showLoginModal = signal(false);
   showProfileModal = signal(false);
   
   tempProfile: Omit<UserProfile, 'isLoggedIn'> = {
@@ -91,15 +90,6 @@ export class App implements AfterViewChecked, OnInit {
     this.chatService.sendFeedback(messageId, feedback);
   }
 
-  loginSimulate(name: string) {
-    const userName = name.trim() || '大厨';
-    const newProfile = { ...this.userProfile(), isLoggedIn: true, name: userName };
-    this.userProfile.set(newProfile);
-    this.persistProfile(newProfile);
-    this.showLoginModal.set(false);
-    this.openProfileModal();
-  }
-
   logout() {
     const emptyProfile = {
       isLoggedIn: false,
@@ -125,7 +115,10 @@ export class App implements AfterViewChecked, OnInit {
   }
 
   saveProfile() {
-    const newProfile = { ...this.userProfile(), ...this.tempProfile };
+    const newProfile = { ...this.userProfile(), ...this.tempProfile, isLoggedIn: true };
+    if (!newProfile.name) {
+      newProfile.name = '大厨';
+    }
     this.userProfile.set(newProfile);
     this.persistProfile(newProfile);
     this.showProfileModal.set(false);

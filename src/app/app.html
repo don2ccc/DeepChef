@@ -14,7 +14,7 @@
       <div class="flex items-center gap-2 text-xs text-gray-400 font-medium hidden sm:flex">
         DEPLOYED ON <span class="font-bold text-black tracking-widest px-2 py-1 bg-gray-100 rounded border border-gray-200">VERCEL</span>
       </div>
-      <span class="material-symbols-outlined text-gray-400 cursor-pointer hover:text-emerald-600 transition-colors" style="font-size: 24px;">settings</span>
+      <span class="material-symbols-outlined text-gray-400 cursor-pointer hover:text-emerald-600 transition-colors" style="font-size: 24px;" (click)="openProfileModal()">settings</span>
     </div>
   </div>
 </header>
@@ -37,21 +37,21 @@
       </div>
     </div>
     <div class="p-4 bg-gray-50 border-t border-gray-200">
-      <div class="flex items-center justify-between px-2 py-1 cursor-pointer hover:bg-gray-100 rounded-lg transition-colors p-2" (click)="userProfile().isLoggedIn ? openProfileModal() : showLoginModal.set(true)">
+      <div class="flex items-center justify-between px-2 py-1 cursor-pointer hover:bg-gray-100 rounded-lg transition-colors p-2" (click)="openProfileModal()">
         <div class="flex items-center gap-3">
           @if (userProfile().isLoggedIn) {
             <div class="w-8 h-8 rounded-full bg-emerald-600 flex items-center justify-center text-white font-bold text-xs shadow-inner shrink-0">{{ userProfile().name.charAt(0) }}</div>
             <div class="flex-1 overflow-hidden">
               <p class="text-xs font-bold text-gray-900 truncate">{{ userProfile().name }}</p>
-              <p class="text-[10px] text-emerald-600 truncate uppercase tracking-tighter font-bold">已登录 · 点击修改偏好</p>
+              <p class="text-[10px] text-emerald-600 truncate uppercase tracking-tighter font-bold">已开启私人厨房体验 · 齿轮修改</p>
             </div>
           } @else {
             <div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 font-bold text-xs shadow-inner shrink-0">
-              <span class="material-symbols-outlined text-[16px]">person_add</span>
+              <span class="material-symbols-outlined text-[16px]">tune</span>
             </div>
             <div class="flex-1 overflow-hidden">
-              <p class="text-xs font-bold text-gray-900 truncate">未登录</p>
-              <p class="text-[10px] text-gray-500 truncate uppercase tracking-tighter">简单注册 建立个人偏好库</p>
+              <p class="text-xs font-bold text-gray-900 truncate">默认大厨</p>
+              <p class="text-[10px] text-gray-500 truncate uppercase tracking-tighter">设置名称与偏好</p>
             </div>
           }
         </div>
@@ -245,34 +245,6 @@
   </section>
 </main>
 
-<!-- Login Modal -->
-@if (showLoginModal()) {
-  <div class="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
-    <div class="bg-white rounded-2xl w-full max-w-sm p-6 shadow-xl border border-gray-100 relative">
-      <button (click)="showLoginModal.set(false)" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
-        <span class="material-symbols-outlined">close</span>
-      </button>
-      <div class="text-center space-y-4 mb-6">
-        <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-2">
-          <span class="material-symbols-outlined text-3xl">account_circle</span>
-        </div>
-        <h3 class="text-xl font-bold text-gray-900">简单注册 / 登录</h3>
-        <p class="text-sm text-gray-500 leading-relaxed">建立您的个人信息库，定制专属健康食谱，系统将自动记住您的偏好。</p>
-      </div>
-
-      <div class="space-y-4">
-        <div>
-          <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">昵称</label>
-          <input type="text" #nameInput class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/10 outline-none text-sm transition-all" placeholder="您怎么称呼？">
-        </div>
-        <button (click)="loginSimulate(nameInput.value)" class="w-full py-3 bg-emerald-600 text-white rounded-xl text-sm font-bold hover:bg-emerald-700 transition-colors shadow-sm">
-          进入我的厨房
-        </button>
-      </div>
-    </div>
-  </div>
-}
-
 <!-- Profile Modal -->
 @if (showProfileModal()) {
   <div class="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
@@ -286,6 +258,10 @@
       </h3>
       
       <div class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">您的称谓/昵称</label>
+          <input type="text" [(ngModel)]="tempProfile.name" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/10 outline-none text-sm transition-all" placeholder="例如: 大厨">
+        </div>
         <div>
           <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">家庭就餐人数</label>
           <input type="number" [(ngModel)]="tempProfile.familyMembers" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/10 outline-none text-sm transition-all" placeholder="例如: 3">
@@ -303,8 +279,8 @@
       <div class="mt-8 flex justify-between items-center">
         <button (click)="logout()" class="text-xs font-bold text-rose-500 hover:text-rose-600 transition-colors">退出登录</button>
         <div class="flex gap-3">
-          <button (click)="showProfileModal.set(false)" class="px-5 py-2.5 text-sm font-bold text-gray-500 hover:bg-gray-100 rounded-lg transition-colors">稍后再说</button>
-          <button (click)="saveProfile()" class="px-4 py-2.5 bg-emerald-600 text-white text-sm font-bold rounded-lg hover:bg-emerald-700 transition-colors shadow-sm">保存偏好</button>
+          <button (click)="showProfileModal.set(false)" class="px-5 py-2.5 text-sm font-bold text-gray-500 hover:bg-gray-100 rounded-lg transition-colors">取消</button>
+          <button (click)="saveProfile()" class="px-4 py-2.5 bg-emerald-600 text-white text-sm font-bold rounded-lg hover:bg-emerald-700 transition-colors shadow-sm">保存并生效</button>
         </div>
       </div>
     </div>

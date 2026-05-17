@@ -13,18 +13,42 @@ const supabaseUrl = ''; // Configured in backend or loaded somehow if we needed 
   providedIn: 'root'
 })
 export class ChatService {
-  messages = signal<Message[]>([
+  private readonly DEFAULT_MESSAGES: Message[] = [
     {
       id: '1',
       role: 'chef',
       content: '今天想吃点什么？告诉我你的冰箱里有什么食材。',
       type: 'text'
     }
-  ]);
-  
+  ];
+
+  messages = signal<Message[]>([]);
   isLoading = signal<boolean>(false);
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) {
+    this.loadMessages();
+  }
+
+  private loadMessages() {
+    try {
+      const saved = localStorage.getItem('deepchef_messages');
+      if (saved) {
+        this.messages.set(JSON.parse(saved));
+      } else {
+        this.messages.set(this.DEFAULT_MESSAGES);
+      }
+    } catch {
+      this.messages.set(this.DEFAULT_MESSAGES);
+    }
+  }
+
+  private saveMessages(msgs: Message[]) {
+    try {
+      localStorage.setItem('deepchef_messages', JSON.stringify(msgs));
+    } catch {
+      // ignore
+    }
+  }
 
   async sendMessage(content: string, profile?: any) {
     // Add user message optimistically
@@ -35,7 +59,11 @@ export class ChatService {
       type: 'text'
     };
     
-    this.messages.update(msgs => [...msgs, userMsg]);
+    this.messages.update(msgs => {
+      const newMsgs = [...msgs, userMsg];
+      this.saveMessages(newMsgs);
+      return newMsgs;
+    });
     this.isLoading.set(true);
 
     try {
@@ -48,32 +76,36 @@ export class ChatService {
       );
       
       if (response && response.message) {
-         this.messages.update(msgs => [...msgs, response.message]);
-         this.saveToSupabase(userMsg, response.message);
+         this.messages.update(msgs => {
+           const newMsgs = [...msgs, response.message];
+           this.saveMessages(newMsgs);
+           return newMsgs;
+         });
       }
     } catch (error) {
       console.error('Error sending message:', error);
       // Fallback message for demo/errors
-      this.messages.update(msgs => [...msgs, {
-        id: Date.now().toString(),
-        role: 'chef',
-        content: '抱歉，我的魔法暂时失效了，请稍后再试。'
-      }]);
+      this.messages.update(msgs => {
+        const fallbackMsg: Message = {
+          id: Date.now().toString(),
+          role: 'chef',
+          content: '抱歉，我的魔法暂时失效了，请稍后再试。'
+        };
+        const newMsgs = [...msgs, fallbackMsg];
+        this.saveMessages(newMsgs);
+        return newMsgs;
+      });
     } finally {
       this.isLoading.set(false);
     }
   }
 
-  private saveToSupabase(userMsg: Message, chefMsg: Message) {
-    // This is where you would save to Supabase.
-    // Example:
-    // supabase.from('conversations').insert([{ user_msg: userMsg, chef_msg: chefMsg }])
-    console.log('Would save to Supabase:', { userMsg, chefMsg });
-  }
-
   sendFeedback(messageId: string, feedback: 'like' | 'dislike') {
-    this.messages.update(msgs => msgs.map(m => m.id === messageId ? { ...m, feedback } : m));
-    // Simulated backend call to update feedback in DB
-    console.log(`Feedback ${feedback} saved for message ${messageId}`);
+    this.messages.update(msgs => {
+      const newMsgs = msgs.map(m => m.id === messageId ? { ...m, feedback } : m);
+      this.saveMessages(newMsgs);
+      return newMsgs;
+    });
+    console.log(`Feedback ${feedback} saved in local storage for message ${messageId}`);
   }
 }
