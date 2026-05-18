@@ -3,7 +3,6 @@ import { OpenAI } from 'openai';
 
 let gemini: GoogleGenAI | null = null;
 let deepseek: OpenAI | null = null;
-let openrouter: OpenAI | null = null;
 
 const SYSTEM_INSTRUCTION = `
 You are a Kitchen Wizard, a professional AI Chef. 
@@ -85,46 +84,7 @@ User Profile (Use this to tailor your recipes):
 
     let resultJson = "";
 
-    if (process.env['OPENROUTER_API_KEY'] && process.env['OPENROUTER_API_KEY'] !== '') {
-      // Use OpenRouter
-      if (!openrouter) {
-        openrouter = new OpenAI({
-          baseURL: 'https://openrouter.ai/api/v1',
-          apiKey: process.env['OPENROUTER_API_KEY']
-        });
-      }
-
-      const messages = [
-        { role: 'system', content: systemInstructionWithProfile },
-        ...formattedHistory.map((msg: { role: string, content: string }) => ({
-          role: msg.role === 'model' ? 'assistant' : 'user',
-          content: msg.content
-        }))
-      ];
-      
-      const requestOptions: any = {
-        model: 'meta-llama/llama-3.3-70b-instruct:free',
-        messages: messages as OpenAI.Chat.ChatCompletionMessageParam[],
-        response_format: { type: 'json_object' }
-      };
-
-      const response = await openrouter.chat.completions.create(requestOptions);
-      
-      const choiceMsg = response.choices[0].message as any;
-      let rawContent = choiceMsg.content || '{}';
-
-      const jsonMatch = rawContent.match(/```(?:json)?\s*([\s\S]+?)\s*```/);
-      if (jsonMatch) {
-         resultJson = jsonMatch[1];
-      } else {
-         const curlyMatch = rawContent.match(/\{[\s\S]*\}/);
-         if (curlyMatch) {
-            resultJson = curlyMatch[0];
-         } else {
-            resultJson = rawContent;
-         }
-      }
-    } else if (process.env['DEEPSEEK_API_KEY'] && process.env['DEEPSEEK_API_KEY'] !== '') {
+    if (process.env['DEEPSEEK_API_KEY'] && process.env['DEEPSEEK_API_KEY'] !== '') {
       // Use DeepSeek
       if (!deepseek) {
         deepseek = new OpenAI({
@@ -165,7 +125,7 @@ User Profile (Use this to tailor your recipes):
       }
     } else {
       if (!process.env['GEMINI_API_KEY'] || process.env['GEMINI_API_KEY'] === 'MY_GEMINI_API_KEY') {
-        throw new Error('Please set OPENROUTER_API_KEY, DEEPSEEK_API_KEY, or verify your GEMINI_API_KEY in AI Studio Settings.');
+        throw new Error('Please set DEEPSEEK_API_KEY, or verify your GEMINI_API_KEY in AI Studio Settings.');
       }
       if (!gemini) {
         gemini = new GoogleGenAI({ apiKey: process.env['GEMINI_API_KEY'] });
