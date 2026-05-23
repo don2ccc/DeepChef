@@ -120,14 +120,34 @@
         
         <!-- Chef Message -->
         @if (message.role === 'chef') {
-          <div class="flex gap-4 max-w-3xl">
-            <div class="w-8 h-8 rounded-full bg-emerald-100 flex-shrink-0 flex items-center justify-center text-emerald-700 mt-1 border border-emerald-200 shadow-sm text-[16px]">👨‍🍳</div>
+          <div class="flex gap-4 max-w-3xl font-sans">
+            @if (message.isBattle) {
+              <div class="w-8 h-8 rounded-full bg-rose-100 flex-shrink-0 flex items-center justify-center text-rose-700 mt-1 border border-rose-300 shadow-sm text-[16px] select-none animate-bounce">🤬</div>
+            } @else {
+              <div class="w-8 h-8 rounded-full bg-emerald-100 flex-shrink-0 flex items-center justify-center text-emerald-700 mt-1 border border-emerald-200 shadow-sm text-[16px] select-none">👨‍🍳</div>
+            }
             
             <div class="space-y-4 w-full w-auto max-w-[calc(100%-40px)]">
-              <div class="bg-gray-100 rounded-2xl rounded-tl-none p-4 inline-block">
-                <!-- Using innerHTML as content might contain styled text like <strong> -->
-                <p class="text-sm leading-relaxed text-slate-900" [innerHTML]="message.content"></p>
-              </div>
+              @if (message.isBattle) {
+                <div class="bg-rose-50 border border-rose-200 rounded-2xl rounded-tl-none p-4 inline-block shadow-md">
+                  <div class="flex items-center gap-1.5 mb-2 font-semibold text-rose-600 text-[11px] tracking-wider uppercase animate-pulse">
+                    <span class="material-symbols-outlined text-[14px] text-rose-500 animate-pulse">bolt</span>
+                    {{ t('chefInBattle') }}
+                  </div>
+                  <!-- Using innerHTML as content might contain styled text like <strong> -->
+                  <p class="text-sm leading-relaxed text-rose-950 font-medium mb-3" [innerHTML]="message.content"></p>
+                  
+                  <button (click)="openBattleArena()" class="flex items-center gap-1.5 bg-gradient-to-r from-rose-600 to-orange-500 hover:from-rose-700 hover:to-orange-600 text-white font-bold text-xs py-1.5 px-3.5 rounded-full shadow-md hover:shadow-lg active:scale-95 transition-all">
+                    <span class="material-symbols-outlined text-[14px] animate-pulse">local_fire_department</span>
+                    {{ t('battleStartButton') }}
+                  </button>
+                </div>
+              } @else {
+                <div class="bg-gray-100 rounded-2xl rounded-tl-none p-4 inline-block">
+                  <!-- Using innerHTML as content might contain styled text like <strong> -->
+                  <p class="text-sm leading-relaxed text-slate-900" [innerHTML]="message.content"></p>
+                </div>
+              }
 
               <!-- Options -->
               @if (message.type === 'options' && message.options) {
@@ -359,7 +379,9 @@
                   <div class="mt-auto pt-4 border-t border-gray-100">
                     <p class="text-xs font-bold text-gray-500 mb-2">{{ t('mainIngredients') }}</p>
                     <p class="text-sm text-slate-700 truncate">
-                      {{ recipe.ingredients.map(i => i.name).join(', ') }}
+                      @for (ing of recipe.ingredients; track ing.name; let last = $last) {
+                        {{ ing.name }}{{ !last ? ', ' : '' }}
+                      }
                     </p>
                   </div>
                 </div>
@@ -470,6 +492,160 @@
           <button (click)="saveProfile()" class="px-4 py-2.5 bg-emerald-600 text-white text-sm font-bold rounded-lg hover:bg-emerald-700 transition-colors shadow-sm">{{ t('saveAndApply') }}</button>
         </div>
       </div>
+    </div>
+  </div>
+}
+
+<!-- Kitchen Battle Arena Modal -->
+@if (showBattleModal()) {
+  <div class="fixed inset-0 z-[110] flex items-center justify-center bg-slate-950/80 backdrop-blur-md px-4 py-6">
+    <div class="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-2xl h-[90vh] md:h-[80vh] flex flex-col shadow-2xl overflow-hidden font-sans">
+      
+      <!-- Modal Header -->
+      <div class="px-6 py-4 border-b border-slate-800 flex items-center justify-between bg-slate-900/50 backdrop-blur-sm">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-full bg-orange-500/10 border border-orange-500/30 flex items-center justify-center text-orange-400 animate-pulse">
+            <span class="material-symbols-outlined text-[18px]">local_fire_department</span>
+          </div>
+          <h3 class="text-md font-extrabold text-slate-100 tracking-tight">
+            {{ t('battleTitle') }}
+          </h3>
+        </div>
+        <button (click)="showBattleModal.set(false)" class="flex items-center gap-1 text-xs text-slate-400 hover:text-white px-3 py-1.5 rounded-lg bg-slate-800/60 hover:bg-slate-800 transition-colors">
+          <span class="material-symbols-outlined text-[14px]">close</span>
+          {{ t('battleClose') }}
+        </button>
+      </div>
+
+      <!-- Step 1: Language Picker -->
+      @if (battleStep() === 'lang') {
+        <div class="flex-1 p-6 md:p-8 flex flex-col justify-center max-w-lg mx-auto">
+          <div class="text-center mb-8">
+            <p class="text-[32px] mb-3 select-none">🔥🤬🍳</p>
+            <h4 class="text-sm font-bold bg-gradient-to-r from-orange-400 to-rose-400 bg-clip-text text-transparent uppercase tracking-wider mb-2">
+              Kitchen Battle Mode
+            </h4>
+            <p class="text-sm text-slate-400">
+              {{ t('battlePickLangToFight') }}
+            </p>
+          </div>
+
+          <div class="space-y-4">
+            <!-- Chinese Option -->
+            <button (click)="selectBattleLanguage('zh')" class="w-full text-left p-5 rounded-2xl bg-slate-800 hover:bg-gradient-to-r hover:from-slate-800 hover:to-orange-950/20 border border-slate-700 hover:border-orange-500 transition-all group flex items-center justify-between shadow-md">
+              <div class="pr-4">
+                <h5 class="text-sm font-bold text-slate-100 group-hover:text-orange-400 transition-colors">
+                  {{ t('battleChinese') }}
+                </h5>
+                <p class="text-xs text-slate-400 mt-1 lines-2 leading-relaxed">
+                  开启神仙级别段子手！大厨将施展地道中式烹饪吐槽、相声级回怼和生动的家常柴米油盐奇招，火力拉满！
+                </p>
+              </div>
+              <span class="material-symbols-outlined text-slate-500 group-hover:text-orange-400 group-hover:translate-x-1 duration-200 transition-all">arrow_forward</span>
+            </button>
+
+            <!-- English Option -->
+            <button (click)="selectBattleLanguage('en')" class="w-full text-left p-5 rounded-2xl bg-slate-800 hover:bg-gradient-to-r hover:from-slate-800 hover:to-rose-950/20 border border-slate-700 hover:border-rose-500 transition-all group flex items-center justify-between shadow-md">
+              <div class="pr-4">
+                <h5 class="text-sm font-bold text-slate-100 group-hover:text-rose-400 transition-colors">
+                  {{ t('battleEnglish') }}
+                </h5>
+                <p class="text-xs text-slate-400 mt-1 lines-2 leading-relaxed">
+                  Fierce British/American high-energy kitchen roasts. Unleash Ramsay-level wit and hilarious food analogies.
+                </p>
+              </div>
+              <span class="material-symbols-outlined text-slate-500 group-hover:text-rose-400 group-hover:translate-x-1 duration-200 transition-all">arrow_forward</span>
+            </button>
+          </div>
+        </div>
+      }
+
+      <!-- Step 2: Live Battle Chat Arena -->
+      @if (battleStep() === 'arena') {
+        <div class="flex-1 flex flex-col min-h-0 bg-slate-950/30">
+          
+          <!-- Battle Chat Container -->
+          <div id="battle-chat-container" class="flex-1 overflow-y-auto p-4 md:p-6 space-y-4">
+            @for (msg of battleMessages(); track msg.id) {
+              <div class="flex flex-col" [class.items-end]="msg.role === 'user'" [class.items-start]="msg.role === 'chef'">
+                
+                <div class="flex items-start gap-2.5 max-w-[85%]">
+                  @if (msg.role === 'chef') {
+                    <div class="w-7 h-7 rounded-full bg-rose-500/10 border border-rose-500/30 flex items-center justify-center text-[14px] mt-1 flex-shrink-0 animate-bounce">
+                      🤬
+                    </div>
+                  }
+                  
+                  <div class="p-4 rounded-2xl text-sm leading-relaxed" 
+                       [class.bg-orange-500]="msg.role === 'user'" 
+                       [class.text-white]="msg.role === 'user'" 
+                       [class.rounded-tr-none]="msg.role === 'user'"
+                       [class.bg-slate-800]="msg.role === 'chef'" 
+                       [class.text-slate-100]="msg.role === 'chef'" 
+                       [class.rounded-tl-none]="msg.role === 'chef'"
+                       [class.border]="msg.role === 'chef'"
+                       [class.border-slate-700]="msg.role === 'chef'">
+                    <p [innerHTML]="msg.content"></p>
+                  </div>
+                </div>
+
+                <!-- Timestamp or role visual anchor -->
+                <span class="text-[10px] text-slate-500 mt-1 px-1">
+                  {{ msg.role === 'chef' ? 'Kitchen Wizard' : 'You' }}
+                </span>
+
+              </div>
+            }
+
+            <!-- Loading Indicator Inside Battle -->
+            @if (battleIsLoading()) {
+              <div class="flex items-start gap-2.5">
+                <div class="w-7 h-7 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-[14px] flex-shrink-0">
+                  🍳
+                </div>
+                <div class="bg-slate-800 border border-slate-700 rounded-2xl rounded-tl-none p-3.5 flex items-center gap-1 text-slate-400 text-xs h-10 shadow-md">
+                  <span class="w-1.5 h-1.5 rounded-full bg-orange-500 animate-bounce" style="animation-delay: 0.1s"></span>
+                  <span class="w-1.5 h-1.5 rounded-full bg-orange-500 animate-bounce" style="animation-delay: 0.2s"></span>
+                  <span class="w-1.5 h-1.5 rounded-full bg-orange-500 animate-bounce" style="animation-delay: 0.3s"></span>
+                </div>
+              </div>
+            }
+          </div>
+
+          <!-- Battle Action & Input Panel -->
+          <div class="p-4 border-t border-slate-800 bg-slate-900/60 backdrop-blur-md">
+            <form (submit)="sendBattleMessage($event)" class="flex gap-2.5 items-center">
+              
+              <!-- Concede / Give Up Button -->
+              <button type="button" 
+                      (click)="concedeBattle()" 
+                      [disabled]="battleIsLoading()" 
+                      class="px-3 md:px-4 py-3 bg-rose-500/10 hover:bg-rose-500/20 active:bg-rose-500/30 text-rose-400 hover:text-rose-300 border border-rose-500/30 rounded-xl font-bold text-xs flex items-center gap-1.5 transition-all outline-none flex-shrink-0 disabled:opacity-50">
+                <span class="material-symbols-outlined text-[14px]">flag</span>
+                <span class="hidden sm:inline">{{ t('battleConcede') }}</span>
+              </button>
+
+              <!-- Main Debate Input -->
+              <input type="text"
+                     [(ngModel)]="battleInput"
+                     name="battleInput"
+                     [disabled]="battleIsLoading()"
+                     [placeholder]="t('battleInputPlaceholder')"
+                     class="flex-1 px-4 py-3 bg-slate-800 text-slate-100 border border-slate-700 rounded-xl focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 placeholder-slate-500 outline-none text-sm transition-all">
+
+              <!-- Send Button -->
+              <button type="submit"
+                      [disabled]="battleIsLoading() || !battleInput().trim()"
+                      class="p-3 bg-gradient-to-r from-orange-500 to-amber-500 hover:brightness-110 active:scale-95 disabled:opacity-40 disabled:scale-100 text-white rounded-xl shadow-md cursor-pointer transition-all flex items-center justify-center flex-shrink-0">
+                <span class="material-symbols-outlined text-[18px]">send</span>
+              </button>
+
+            </form>
+          </div>
+
+        </div>
+      }
+
     </div>
   </div>
 }

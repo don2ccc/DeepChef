@@ -16,6 +16,7 @@ export interface Message {
   feedback?: 'like' | 'dislike';
   reasoning?: string;
   audioUrl?: string;
+  isBattle?: boolean;
 }
 
 export interface ChatSession {

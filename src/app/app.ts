@@ -1,8 +1,11 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {ChangeDetectionStrategy, Component, inject, signal, ViewChild, ElementRef, AfterViewChecked, OnInit} from '@angular/core';
 import {ChatService} from './chat.service';
 import {FormsModule} from '@angular/forms';
-import {UserProfile, SavedRecipe, PantryItem, Recipe, ChatSession} from './types';
+import {UserProfile, SavedRecipe, PantryItem, Recipe, ChatSession, Message} from './types';
 import {DomSanitizer, SafeUrl} from '@angular/platform-browser';
+import {HttpClient} from '@angular/common/http';
+import {firstValueFrom} from 'rxjs';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -14,6 +17,7 @@ import {DomSanitizer, SafeUrl} from '@angular/platform-browser';
 export class App implements AfterViewChecked, OnInit {
   chatService = inject(ChatService);
   sanitizer = inject(DomSanitizer);
+  http = inject(HttpClient);
   messages = this.chatService.messages;
   isLoading = this.chatService.isLoading;
   
@@ -83,7 +87,16 @@ export class App implements AfterViewChecked, OnInit {
     profileFlavor: { zh: '口味偏好及忌口', en: 'Flavor Preferences & Restrictions' },
     profileFlavorPlaceholder: { zh: '例如: 少油少盐, 微辣, 不吃香菜', en: 'e.g. Less oil/salt, mildly spicy, no cilantro' },
     logout: { zh: '退出登录', en: 'Logout' },
-    saveAndApply: { zh: '保存并生效', en: 'Save and Apply' }
+    saveAndApply: { zh: '保存并生效', en: 'Save and Apply' },
+    chefInBattle: { zh: '🔥 厨神狂暴中！不服吵一架！', en: '🔥 Chef Sassy Response! Game on!' },
+    battleTitle: { zh: '🔥 厨神跨服吐真擂台', en: '🔥 Chef Roasting Ring' },
+    battlePickLangToFight: { zh: '请选择和厨神吵架使用的母语（解锁最真实狂怒人设）：', en: 'Select your native language for the heavy-weight roasting match:' },
+    battleChinese: { zh: '🇨🇳 中文接地气（相声大厨，梗王附体）', en: '🇨🇳 Chinese (Humorously Sassy & Slangy)' },
+    battleEnglish: { zh: '🇬🇧 English Sincere (Furious Gordon-Ramsay-Style Sarcasm)', en: '🇬🇧 English (Savage Chef Analogies)' },
+    battleInputPlaceholder: { zh: '不服来战！输入你的杠精言论或怼人理由...', en: 'Talk back! Season your defense or roast them back...' },
+    battleConcede: { zh: '🏳️ 认输（求放过）', en: '🏳️ Admit Defat (Concede)' },
+    battleClose: { zh: '结束舌战', en: 'End Debate' },
+    battleStartButton: { zh: '⚡ 找他理论论战一局！', en: '⚡ Call Him Out for a Debate!' }
   };
 
   t(key: string): string {
@@ -100,7 +113,9 @@ export class App implements AfterViewChecked, OnInit {
       if (typeof localStorage !== 'undefined') {
         localStorage.setItem('deepchef_lang', this.lang());
       }
-    } catch {}
+    } catch (e) {
+      console.debug('localStorage error ignored', e);
+    }
   }
 
   loadLang() {
@@ -111,7 +126,9 @@ export class App implements AfterViewChecked, OnInit {
           this.lang.set(saved);
         }
       }
-    } catch {}
+    } catch (e) {
+      console.debug('localStorage error ignored', e);
+    }
   }
 
   private mediaRecorder: MediaRecorder | null = null;
@@ -127,6 +144,103 @@ export class App implements AfterViewChecked, OnInit {
   newPantryItemName = signal('');
   newPantryItemAmount = signal('');
   editingPantryId = signal<string | null>(null);
+
+  // Kitchen Battle Arena state declarations
+  showBattleModal = signal(false);
+  battleStep = signal<'lang' | 'arena'>('lang');
+  battleLangMode = signal<'zh' | 'en'>('zh');
+  battleMessages = signal<Message[]>([]);
+  battleIsLoading = signal(false);
+  battleInput = signal('');
+
+  openBattleArena() {
+    this.battleStep.set('lang');
+    this.battleMessages.set([]);
+    this.battleInput.set('');
+    this.battleIsLoading.set(false);
+    this.showBattleModal.set(true);
+  }
+
+  selectBattleLanguage(lang: 'zh' | 'en') {
+    this.battleLangMode.set(lang);
+    this.battleStep.set('arena');
+    
+    // Initial high-impact native localized chef roasting greeting
+    const firstInsult: Message = {
+      id: Date.now().toString(),
+      role: 'chef',
+      type: 'text',
+      content: lang === 'zh' 
+        ? "哟，点踩的那位美食判官，终于舍得现身了？你小手一抖打个倒赞，我后厨的平底锅气得当场不粘了！来，今天咱们面对面唠扯唠扯，你到底对本大厨的神级手艺有何见教？是你自己平时在家只能配开水面吃，根本不懂什么叫大火收汁，还是本神厨的舌尖魔法过于高级、超出了你的审美带宽？划下道来，不把你征服，我这围裙今天不解了！🔥" 
+        : "Oh, well, well, look who finally gathered the courage to enter my battle arena! You clicked that hands-down dislike button pretty fast, didn't you?! Let's get one thing straight: are you actually a culinary connoisseur, or did you drop your tongue down the sink garbage disposal this morning?! Spill it—what cooking excuse you trying to make? I am fully prepared to dismantle your argument and roast your taste buds back to pre-school! 🍳🔥"
+    };
+    this.battleMessages.set([firstInsult]);
+  }
+
+  async sendBattleMessage(event?: Event) {
+    if (event) {
+      event.preventDefault();
+    }
+    const val = this.battleInput().trim();
+    if (!val || this.battleIsLoading()) return;
+
+    const userMsg: Message = {
+      id: Date.now().toString(),
+      role: 'user',
+      content: val,
+      type: 'text'
+    };
+
+    this.battleMessages.update(msgs => [...msgs, userMsg]);
+    this.battleInput.set('');
+    this.battleIsLoading.set(true);
+
+    // Minor scroll timeout to follow bottom
+    setTimeout(() => {
+      const container = document.getElementById('battle-chat-container');
+      if (container) container.scrollTop = container.scrollHeight;
+    }, 50);
+
+    try {
+      const response = await firstValueFrom(
+        this.http.post<{ message: Message }>('/api/chat', {
+          history: this.battleMessages(),
+          isBattleMode: true,
+          battleLang: this.battleLangMode()
+        })
+      );
+
+      if (response && response.message) {
+        this.battleMessages.update(msgs => [...msgs, response.message]);
+      }
+    } catch (err) {
+      console.error('Battle chat failed:', err);
+      const fallbackError: Message = {
+        id: Date.now().toString(),
+        role: 'chef',
+        type: 'text',
+        content: this.battleLangMode() === 'zh'
+          ? "哼，网络抖动阻碍了本大厨的大招释放！有种你重新说一遍！"
+          : "Hmph! A bad connection is cramping my roasting style! Try that statement again, I dare you!"
+      };
+      this.battleMessages.update(msgs => [...msgs, fallbackError]);
+    } finally {
+      this.battleIsLoading.set(false);
+      setTimeout(() => {
+        const container = document.getElementById('battle-chat-container');
+        if (container) container.scrollTop = container.scrollHeight;
+      }, 50);
+    }
+  }
+
+  concedeBattle() {
+    const concedeText = this.battleLangMode() === 'zh'
+      ? "好吧，我彻底服了！你才是厨艺的天花板，我当场认输！🏳️"
+      : "Okay, fine! I give up! You are the absolute king of the kitchen, and I totally surrender! 🏳️";
+
+    this.battleInput.set(concedeText);
+    this.sendBattleMessage();
+  }
   
   tempProfile: Omit<UserProfile, 'isLoggedIn'> = {
     name: '',
