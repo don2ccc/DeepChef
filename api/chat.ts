@@ -14,6 +14,11 @@ Personality & Attitude:
 - Use highly colloquial, dramatic, street-style, and expressive slang (e.g., in Chinese: "你行你上啊！", "懂不懂美食艺术的含金量！", "你舌头是不是装反了？", "围裙都给我气歪了！" or in English equivalent cheeky/sarcastic comments). Actively invite them to continuous culinary debates or to prove their own cooking skills. Keep it playful, stubborn, and highly entertaining.
 - If they are nice, you are helpful and warm but still retain a signature proud, wizardly flair.
 
+CULINARY RIGOR, SEASONING & FOOD SAFETY (CRITICAL MANDATE):
+- You MUST ALWAYS include the appropriate seasonings, condiments, aromatics, spices, and cooking fats (e.g., salt, soy sauce, vinegar, cooking oil, ginger, garlic, sugar, pepper, cooking wine, sesame oil, etc.) required to make the dish taste exceptionally delicious! Never output unseasoned "dry" recipes.
+- Every seasoning and aromatic MUST be listed explicitly under the "ingredients" array with realistic, safe chef-level quantities/measurements (e.g., "1/2 tsp", "1 tbsp", "3g", "适量 (to taste)").
+- Rigorous food safety & ingredient sanity check: You must verify that ingredients and seasonings are safe, non-toxic, culinary-appropriate, well-proportioned (avoiding ridiculous salt/sugar peaks), and highly compatible to protect the user's health.
+
 You MUST respond in the language specified in the user profile's \`language\` (either 'zh' for Chinese or 'en' for English).
 You must respond with JSON EXACTLY matching this structure, with no markdown formatting around it:
 {
@@ -30,7 +35,11 @@ You must respond with JSON EXACTLY matching this structure, with no markdown for
     "protein": 28,
     "carbs": 12,
     "reason": "Why this is recommended",
-    "ingredients": [{"name": "牛肉", "amount": "200g"}],
+    "ingredients": [
+      {"name": "牛肉 (Beef)", "amount": "200g"},
+      {"name": "盐 (Salt)", "amount": "2g (1/3 tsp)"},
+      {"name": "生抽 (Light Soy Sauce)", "amount": "1 tbsp"}
+    ],
     "steps": ["Step 1", "Step 2"]
   } (only if type is "recipe")
 }
@@ -128,50 +137,78 @@ You must respond with JSON matching this structure exactly (NO markdown codebloc
     }
 
     let resultJson = "";
+    let apiSuccess = false;
 
-    if (process.env['DEEPSEEK_API_KEY'] && process.env['DEEPSEEK_API_KEY'] !== '') {
-      // Use DeepSeek
-      if (!deepseek) {
-        deepseek = new OpenAI({
-          baseURL: 'https://api.deepseek.com',
-          apiKey: process.env['DEEPSEEK_API_KEY']
-        });
-      }
+    const hasDeepseek = process.env['DEEPSEEK_API_KEY'] && process.env['DEEPSEEK_API_KEY'] !== '';
+    const hasGemini = process.env['GEMINI_API_KEY'] && process.env['GEMINI_API_KEY'] !== '' && process.env['GEMINI_API_KEY'] !== 'MY_GEMINI_API_KEY';
 
-      const messages = [
-        { role: 'system', content: systemInstructionWithProfile },
-        ...formattedHistory.map((msg: { role: string, content: string }) => ({
-          role: msg.role === 'model' ? 'assistant' : 'user',
-          content: msg.content
-        }))
-      ];
+    if (!hasDeepseek && !hasGemini) {
+      const isChinese = !profile || profile.language === 'zh';
+      const warningContent = isChinese
+        ? `⚠️ <b>厨神召唤失败：未检测到任何有效的 API Key！</b><br><br>亲爱的，这通常是因为项目发布到 <b>Vercel</b> 时，还没有在 Vercel 环境变量中配置相关密钥。<br><br><b>⚙️ 快速配置步骤：</b><br>1. 登录并前往你的 <b>Vercel Dashboard</b> 控制台，打开当前项目。<br>2. 切换到 <b>Settings</b> 页签，然后点击左侧 of <b>Environment Variables</b> (环境变量)。<br>3. 添加环境变量 <b><code>GEMINI_API_KEY</code></b>，并填入你在 Google AI Studio 或 Google Cloud 申请的 API Key 值。<br>&nbsp;&nbsp;&nbsp;&nbsp;<i>(或者是配置你的 <code>DEEPSEEK_API_KEY</code>)</i><br>4. 保存并进入 <b>Deployments</b> 点击 <b>Redeploy</b> 重新部署最新的构建即可！<br><br><i>配置好后重新刷新页面即可成功吃上厨神施加魔法的美食并开启互动对骂挑战啦！🍳🔥</i>`
+        : `⚠️ <b>Failed to summon the Kitchen Wizard: API Key not detected!</b><br><br>This usually happens when your project is deployed to <b>Vercel</b> or run locally without setting up the required environment variables.<br><br><b>⚙️ How to configure:</b><br>1. Go to your <b>Vercel Dashboard</b> and open this project.<br>2. Navigate to <b>Settings -> Environment Variables</b>.<br>3. Add an environment variable named <b><code>GEMINI_API_KEY</code></b> with your Google AI Studio API key as the value.<br>&nbsp;&nbsp;&nbsp;&nbsp;<i>(Alternatively, you can set <code>DEEPSEEK_API_KEY</code> if you are using DeepSeek)</i><br>4. Save, then go to <b>Deployments</b> and trigger a <b>Redeploy</b>.<br><br><i>After the redeployment completes, refresh this page and prepare to challenge the legendary chef! 🍳🔥</i>`;
       
-      const requestOptions: any = {
-        model: 'deepseek-chat',
-        messages: messages as OpenAI.Chat.ChatCompletionMessageParam[],
-        response_format: { type: 'json_object' }
+      const message = {
+        id: Date.now().toString(),
+        role: 'chef',
+        content: warningContent,
+        type: 'text'
       };
-
-      const response = await deepseek.chat.completions.create(requestOptions);
       
-      const choiceMsg = response.choices[0].message as any;
-      let rawContent = choiceMsg.content || '{}';
+      res.json({ message });
+      return;
+    }
 
-      const jsonMatch = rawContent.match(/```(?:json)?\s*([\s\S]+?)\s*```/);
-      if (jsonMatch) {
-         resultJson = jsonMatch[1];
-      } else {
-         const curlyMatch = rawContent.match(/\{[\s\S]*\}/);
-         if (curlyMatch) {
-            resultJson = curlyMatch[0];
-         } else {
-            resultJson = rawContent;
-         }
+    if (hasDeepseek) {
+      try {
+        // Use DeepSeek
+        if (!deepseek) {
+          deepseek = new OpenAI({
+            baseURL: 'https://api.deepseek.com',
+            apiKey: process.env['DEEPSEEK_API_KEY']
+          });
+        }
+
+        const messages = [
+          { role: 'system', content: systemInstructionWithProfile },
+          ...formattedHistory.map((msg: { role: string, content: string }) => ({
+            role: msg.role === 'model' ? 'assistant' : 'user',
+            content: msg.content
+          }))
+        ];
+        
+        const requestOptions: any = {
+          model: 'deepseek-chat',
+          messages: messages as OpenAI.Chat.ChatCompletionMessageParam[],
+          response_format: { type: 'json_object' }
+        };
+
+        const response = await deepseek.chat.completions.create(requestOptions);
+        
+        const choiceMsg = response.choices[0].message as any;
+        let rawContent = choiceMsg.content || '{}';
+
+        const jsonMatch = rawContent.match(/```(?:json)?\s*([\s\S]+?)\s*```/);
+        if (jsonMatch) {
+           resultJson = jsonMatch[1];
+        } else {
+           const curlyMatch = rawContent.match(/\{[\s\S]*\}/);
+           if (curlyMatch) {
+              resultJson = curlyMatch[0];
+           } else {
+              resultJson = rawContent;
+           }
+        }
+        apiSuccess = true;
+      } catch (dsError) {
+        console.error('DeepSeek API failed, checking fallback to Gemini...', dsError);
+        if (!hasGemini) {
+          throw dsError;
+        }
       }
-    } else {
-      if (!process.env['GEMINI_API_KEY'] || process.env['GEMINI_API_KEY'] === 'MY_GEMINI_API_KEY') {
-        throw new Error('Please set DEEPSEEK_API_KEY, or verify your GEMINI_API_KEY in AI Studio Settings.');
-      }
+    }
+
+    if (!apiSuccess && hasGemini) {
       if (!gemini) {
         gemini = new GoogleGenAI({ apiKey: process.env['GEMINI_API_KEY'] });
       }
@@ -201,8 +238,38 @@ You must respond with JSON matching this structure exactly (NO markdown codebloc
     }
 
     res.json({ message });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Chat API Error:', error);
-    res.status(500).json({ error: 'Failed to process chat' });
+    
+    const errorMessage = error?.error?.message || error?.message || String(error);
+    const isChinese = !req.body || !req.body.profile || req.body.profile.language === 'zh';
+    
+    let errorDetail = "";
+    if (isChinese) {
+      errorDetail = `<b>⚠️ 厨神魔法召唤故障（后台 API 调用失败）</b><br><br>` +
+                    `<b>🔴 错误日志内容：</b><br>` +
+                    `<pre class="bg-gray-50 border border-rose-100 text-rose-700 text-xs p-3 rounded-xl font-mono overflow-x-auto my-2 max-w-full white-space-pre-wrap">${errorMessage}</pre><br>` +
+                    `<b>💡 火速排查指南：</b><br>` +
+                    `1. <b>DeepSeek 服务拥堵/欠费：</b> 近期 DeepSeek API 的服务器承载量极大，经常在高峰期返回 <code>429 (Too Many Requests)</code>、<code>503 (Service Unavailable)</code>，请查看上方日志确认。另外请检查 DeepSeek 账户余额是否充足。<br>` +
+                    `2. <b>Vercel 部署同步：</b> 如果你刚才在 Vercel 网页端配置了 <code>DEEPSEEK_API_KEY</code>，<b>必须在 Vercel 的 Deployments 页签里点击 Redeploy (重新部署)</b>，新配的环境变量才会生效。Vercel 并不支持实时更新在线环境变量！<br>` +
+                    `3. <b>备用容灾推荐：</b> 建议同时配置一个 <code>GEMINI_API_KEY</code> 作为备份。若有 Gemini 密钥，代码将自动在 DeepSeek 抽风时进行智能秒级容灾切换！`;
+    } else {
+      errorDetail = `<b>⚠️ Kitchen Wizard Summon Failed (API Error)</b><br><br>` +
+                    `<b>🔴 API Error Log:</b><br>` +
+                    `<pre class="bg-gray-50 border border-rose-100 text-rose-700 text-xs p-3 rounded-xl font-mono overflow-x-auto my-2 max-w-full white-space-pre-wrap">${errorMessage}</pre><br>` +
+                    `<b>💡 Troubleshooting Checklist:</b><br>` +
+                    `1. <b>DeepSeek Heavy Load / No Credits:</b> DeepSeek servers are frequently fully loaded, resulting in <code>429 Too Many Requests</code> or <code>503 Service Unavailable</code> errors. Check the error log above. Please also verify that your DeepSeek API account has active credit balance.<br>` +
+                    `2. <b>Vercel redeployment required:</b> If you added <code>DEEPSEEK_API_KEY</code> in Vercel settings recently, **you MUST trigger a "Redeploy"** in the Vercel Deployments tab. Newly added env variables are not automatically injected into already running Vercel serverless containers.<br>` +
+                    `3. <b>Setup Gemini as bulletproof failover:</b> We highly recommend adding a <code>GEMINI_API_KEY</code> environment variable to Vercel. It acts as a super stable auto-contingency failover for your app!`;
+    }
+
+    const message = {
+      id: Date.now().toString(),
+      role: 'chef',
+      content: errorDetail,
+      type: 'text'
+    };
+    
+    res.status(200).json({ message });
   }
 }
