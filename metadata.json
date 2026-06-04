@@ -1,6 +1,6 @@
 {
-  "name": "",
-  "description": "",
-  "requestFramePermissions": [],
-  "majorCapabilities": []
+  "name": "DeepChef",
+  "description": "A premium, hand-crafted culinary companion inspired by HeroUI featuring a snappy AI chef, interactive cooking battles, personal recipe library, and pantry manager.",
+  "requestFramePermissions": ["microphone"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

@@ -1,268 +1,288 @@
-<!-- TopAppBar -->
-<header class="fixed top-0 w-full z-50 bg-white/90 backdrop-blur-md border-b border-gray-200">
-  <div class="flex justify-between items-center px-4 md:px-12 h-16 w-full mx-auto">
-    <div class="flex items-center gap-3">
-      <button class="md:hidden text-gray-500 hover:text-emerald-600 transition-colors flex items-center justify-center p-1" (click)="sidebarOpen.set(!sidebarOpen())">
-        <span class="material-symbols-outlined">menu</span>
-      </button>
-      <div class="flex items-center gap-2 text-emerald-600 font-bold text-lg md:text-xl tracking-tight cursor-pointer active:scale-95 transition-transform" (click)="activeTab.set('chat'); sidebarOpen.set(false)">
-        <span class="material-symbols-outlined">restaurant</span>
-        <span class="hidden sm:inline">{{ t('appTitle') }}</span>
-        <span class="sm:hidden text-lg">{{ t('appTitle').split(' ').pop() }}</span>
-      </div>
+<!-- Floating TopAppBar Glassmorphism Navbar (HeroUI Style) -->
+<header class="fixed top-3 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-7xl z-50 hero-glass border border-zinc-200/50 rounded-2xl shadow-sm h-16 flex items-center justify-between px-6 transition-all duration-300">
+  <div class="flex items-center gap-3">
+    <button class="md:hidden text-zinc-500 hover:text-brand-600 transition-colors flex items-center justify-center p-1" (click)="sidebarOpen.set(!sidebarOpen())">
+      <span class="material-symbols-outlined">menu</span>
+    </button>
+    <div class="flex items-center gap-2 text-brand-600 font-bold text-lg md:text-xl tracking-tight cursor-pointer active:scale-95 transition-transform" (click)="activeTab.set('chat'); sidebarOpen.set(false)">
+      <span class="material-symbols-outlined text-[24px]">restaurant</span>
+      <span class="hidden sm:inline bg-gradient-to-r from-brand-600 to-pink-500 bg-clip-text text-transparent">{{ t('appTitle') }}</span>
+      <span class="sm:hidden text-lg bg-gradient-to-r from-brand-600 to-pink-500 bg-clip-text text-transparent">{{ t('appTitle').split(' ').pop() }}</span>
     </div>
-    <nav class="hidden md:flex gap-6 items-center">
-      <a class="cursor-pointer text-sm font-sans transition-colors duration-200" 
-         [class]="activeTab() === 'chat' ? 'text-emerald-700 font-bold border-b-2 border-emerald-600 pb-1' : 'text-gray-500 font-medium hover:text-gray-900'"
-         (click)="activeTab.set('chat')">{{ t('tabChat') }}</a>
-      <a class="cursor-pointer text-sm font-sans transition-colors duration-200" 
-         [class]="activeTab() === 'library' ? 'text-emerald-700 font-bold border-b-2 border-emerald-600 pb-1' : 'text-gray-500 font-medium hover:text-gray-900'"
-         (click)="activeTab.set('library')">{{ t('tabLibrary') }}</a>
-      <a class="cursor-pointer text-sm font-sans transition-colors duration-200" 
-         [class]="activeTab() === 'pantry' ? 'text-emerald-700 font-bold border-b-2 border-emerald-600 pb-1' : 'text-gray-500 font-medium hover:text-gray-900'"
-         (click)="activeTab.set('pantry')">{{ t('tabPantry') }}</a>
-    </nav>
-    <div class="flex items-center gap-4">
-      <button (click)="toggleLang()" class="text-sm font-bold text-gray-500 hover:text-emerald-600 transition-colors uppercase tracking-wider px-2 py-1 rounded-md border border-gray-200">
-        {{ lang() === 'zh' ? 'EN' : '中' }}
-      </button>
-      <div class="flex items-center gap-2 text-xs text-gray-400 font-medium hidden sm:flex">
-        DEPLOYED ON <span class="font-bold text-black tracking-widest px-2 py-1 bg-gray-100 rounded border border-gray-200">VERCEL</span>
-      </div>
-      <span class="material-symbols-outlined text-gray-400 cursor-pointer hover:text-emerald-600 transition-colors" style="font-size: 24px;" (click)="openProfileModal()">settings</span>
+  </div>
+
+  <!-- HeroUI Segmented Pill Navigation Control -->
+  <nav class="hidden md:flex bg-zinc-100 p-1 rounded-full border border-black/[0.04]">
+    <button class="cursor-pointer text-xs font-semibold px-4 py-2 rounded-full transition-all duration-200 flex items-center gap-1.5" 
+            [class]="activeTab() === 'chat' ? 'bg-white text-brand-600 shadow-sm font-bold scale-[1.02]' : 'text-zinc-500 hover:text-zinc-800 hover:bg-zinc-50/50'"
+            (click)="activeTab.set('chat')">
+      <span class="material-symbols-outlined text-[16px]">chat</span>
+      <span>{{ t('tabChat') }}</span>
+    </button>
+    <button class="cursor-pointer text-xs font-semibold px-4 py-2 rounded-full transition-all duration-200 flex items-center gap-1.5" 
+            [class]="activeTab() === 'library' ? 'bg-white text-brand-600 shadow-sm font-bold scale-[1.02]' : 'text-zinc-500 hover:text-zinc-800 hover:bg-zinc-50/50'"
+            (click)="activeTab.set('library')">
+      <span class="material-symbols-outlined text-[16px]">menu_book</span>
+      <span>{{ t('tabLibrary') }}</span>
+    </button>
+    <button class="cursor-pointer text-xs font-semibold px-4 py-2 rounded-full transition-all duration-200 flex items-center gap-1.5" 
+            [class]="activeTab() === 'pantry' ? 'bg-white text-brand-600 shadow-sm font-bold scale-[1.02]' : 'text-zinc-500 hover:text-zinc-800 hover:bg-zinc-50/50'"
+            (click)="activeTab.set('pantry')">
+      <span class="material-symbols-outlined text-[16px]">kitchen</span>
+      <span>{{ t('tabPantry') }}</span>
+    </button>
+  </nav>
+
+  <div class="flex items-center gap-3">
+    <button (click)="toggleLang()" class="text-xs font-extrabold text-zinc-500 hover:text-brand-600 transition-colors uppercase tracking-wider px-2.5 py-1.5 rounded-xl border border-zinc-200/60 bg-white/50 active:scale-95">
+      {{ lang() === 'zh' ? 'EN' : '中' }}
+    </button>
+    <div class="flex items-center gap-1.5 text-[10px] text-zinc-400 font-bold hidden lg:flex">
+      DEPLOYED ON <span class="font-bold text-black tracking-widest px-2 py-1 bg-zinc-100 rounded-lg border border-zinc-200/50">VERCEL</span>
     </div>
+    <button (click)="openProfileModal()" class="w-9 h-9 rounded-xl flex items-center justify-center border border-zinc-200/50 hover:bg-zinc-100/50 text-zinc-400 hover:text-brand-600 transition-colors active:scale-90">
+      <span class="material-symbols-outlined text-[20px]">settings</span>
+    </button>
   </div>
 </header>
 
-<main class="pt-16 min-h-[100dvh] flex mx-auto font-sans">
+<main class="pt-24 pb-4 min-h-[100dvh] flex max-w-7xl mx-auto font-sans w-full gap-5 px-4">
   <!-- Sidebar Overlay -->
   @if (sidebarOpen()) {
-    <div class="fixed inset-0 bg-black/20 z-30 md:hidden backdrop-blur-sm" (click)="sidebarOpen.set(false)"></div>
+    <div class="fixed inset-0 bg-black/30 z-30 md:hidden backdrop-blur-sm" (click)="sidebarOpen.set(false)"></div>
   }
 
-  <!-- Sidebar -->
-  <aside class="fixed md:static inset-y-0 left-0 z-40 transform md:transform-none transition-transform duration-300 ease-in-out flex flex-col w-64 bg-white md:bg-transparent h-[100dvh] md:h-[calc(100dvh-64px)] pt-16 md:pt-0 border-r border-gray-200 shrink-0 shadow-2xl md:shadow-none"
+  <!-- Sidebar Container -->
+  <aside class="fixed md:static inset-y-0 left-0 z-40 transform md:transform-none transition-transform duration-300 ease-in-out flex flex-col w-64 bg-white md:bg-white/45 md:backdrop-blur-md h-[100dvh] md:h-[calc(100dvh-112px)] pt-16 md:pt-4 border-r md:border border-zinc-200/50 md:rounded-2xl shrink-0 shadow-2xl md:shadow-sm"
          [class.translate-x-0]="sidebarOpen()"
          [class.-translate-x-full]="!sidebarOpen()">
          
     <!-- Mobile Navigation Links inside Sidebar -->
-    <div class="md:hidden p-4 border-b border-gray-100 flex flex-col gap-2">
-      <a class="cursor-pointer px-3 py-2 text-sm font-bold flex items-center gap-3 rounded-lg transition-colors" 
-         [class]="activeTab() === 'chat' ? 'bg-emerald-50 text-emerald-700' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'"
-         (click)="activeTab.set('chat'); sidebarOpen.set(false)">
-         <span class="material-symbols-outlined text-[20px]">chat</span> {{ t('tabChat') }}
-      </a>
-      <a class="cursor-pointer px-3 py-2 text-sm font-bold flex items-center gap-3 rounded-lg transition-colors" 
-         [class]="activeTab() === 'library' ? 'bg-emerald-50 text-emerald-700' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'"
-         (click)="activeTab.set('library'); sidebarOpen.set(false)">
-         <span class="material-symbols-outlined text-[20px]">menu_book</span> {{ t('tabLibrary') }}
-      </a>
-      <a class="cursor-pointer px-3 py-2 text-sm font-bold flex items-center gap-3 rounded-lg transition-colors" 
-         [class]="activeTab() === 'pantry' ? 'bg-emerald-50 text-emerald-700' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'"
-         (click)="activeTab.set('pantry'); sidebarOpen.set(false)">
-         <span class="material-symbols-outlined text-[20px]">kitchen</span> {{ t('tabPantry') }}
-      </a>
+    <div class="md:hidden p-4 border-b border-zinc-100 flex flex-col gap-1.5">
+      <button class="cursor-pointer px-4 py-2.5 text-xs font-bold flex items-center gap-3 rounded-xl transition-all" 
+              [class]="activeTab() === 'chat' ? 'bg-brand-50 text-brand-700' : 'text-zinc-500 hover:bg-zinc-100 h:text-zinc-900'"
+              (click)="activeTab.set('chat'); sidebarOpen.set(false)">
+         <span class="material-symbols-outlined text-[18px]">chat</span> {{ t('tabChat') }}
+      </button>
+      <button class="cursor-pointer px-4 py-2.5 text-xs font-bold flex items-center gap-3 rounded-xl transition-all" 
+              [class]="activeTab() === 'library' ? 'bg-brand-50 text-brand-700' : 'text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900'"
+              (click)="activeTab.set('library'); sidebarOpen.set(false)">
+         <span class="material-symbols-outlined text-[18px]">menu_book</span> {{ t('tabLibrary') }}
+      </button>
+      <button class="cursor-pointer px-4 py-2.5 text-xs font-bold flex items-center gap-3 rounded-xl transition-all" 
+              [class]="activeTab() === 'pantry' ? 'bg-brand-50 text-brand-700' : 'text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900'"
+              (click)="activeTab.set('pantry'); sidebarOpen.set(false)">
+         <span class="material-symbols-outlined text-[18px]">kitchen</span> {{ t('tabPantry') }}
+      </button>
     </div>
 
-    <div class="p-6">
-      <button (click)="startNewChat()" class="w-full flex items-center justify-center gap-2 bg-emerald-50 text-emerald-700 py-2.5 px-4 rounded-lg text-sm font-bold hover:bg-emerald-100 transition-colors border border-emerald-100">
-        <span class="material-symbols-outlined text-[18px]">add</span>
+    <!-- Active Custom Primary Button -->
+    <div class="p-4">
+      <button (click)="startNewChat()" class="w-full flex items-center justify-center gap-2 bg-brand-50 text-brand-700 py-3 px-4 rounded-xl text-xs font-bold hover:bg-brand-100 active:scale-98 transition-all border border-brand-100/40 shadow-sm">
+        <span class="material-symbols-outlined text-[18px] font-bold">add</span>
         <span>{{ t('newChat') }}</span>
       </button>
     </div>
-    <div class="flex-1 overflow-y-auto px-4 pb-4 custom-scrollbar">
-      <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 px-2">{{ t('history') }}</h3>
+
+    <!-- Chat History List -->
+    <div class="flex-1 overflow-y-auto px-3 pb-4 custom-scrollbar">
+      <h3 class="text-[10px] font-extrabold text-zinc-400 uppercase tracking-widest mb-3 px-3">{{ t('history') }}</h3>
       <div class="space-y-1">
         @if (pastSessions().length > 0) {
           @for (session of pastSessions(); track session.id) {
             <button (click)="loadSession(session)" 
-              class="w-full text-left px-3 py-2 text-sm rounded-lg truncate transition-colors"
-              [class]="currentSessionId() === session.id ? 'bg-emerald-50 text-emerald-700 font-bold' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'">
-              {{ session.title }}
+              class="w-full text-left px-3 py-2.5 text-xs rounded-xl truncate transition-all flex items-center gap-2 font-medium"
+              [class]="currentSessionId() === session.id ? 'bg-brand-100/40 text-brand-800 font-bold border-l-4 border-brand-600' : 'text-zinc-600 hover:bg-zinc-100/50 hover:text-zinc-900'">
+              <span class="material-symbols-outlined text-[14px] opacity-60">chat_bubble</span>
+              <span class="truncate flex-1">{{ session.title }}</span>
             </button>
           }
         } @else {
-          <p class="px-3 py-2 text-sm text-gray-400">{{ t('noHistory') }}</p>
+          <p class="px-3 py-2 text-xs text-zinc-400 italic font-medium">{{ t('noHistory') }}</p>
         }
       </div>
     </div>
-    <div class="p-4 bg-gray-50 border-t border-gray-200">
-      <div class="flex items-center justify-between px-2 py-1 cursor-pointer hover:bg-gray-100 rounded-lg transition-colors p-2" (click)="openProfileModal()">
-        <div class="flex items-center gap-3">
+
+    <!-- Profile Log Footer in Sidebar -->
+    <div class="p-3 bg-zinc-50/70 border-t border-zinc-200/50 rounded-b-2xl">
+      <div class="flex items-center justify-between px-2.5 py-2 cursor-pointer hover:bg-zinc-150 rounded-xl transition-all" (click)="openProfileModal()">
+        <div class="flex items-center gap-2.5 min-w-0">
           @if (userProfile().isLoggedIn) {
-            <div class="w-8 h-8 rounded-full bg-emerald-600 flex items-center justify-center text-white font-bold text-xs shadow-inner shrink-0">{{ userProfile().name.charAt(0) }}</div>
-            <div class="flex-1 overflow-hidden">
-              <p class="text-xs font-bold text-gray-900 truncate">{{ userProfile().name }}</p>
-              <p class="text-[10px] text-emerald-600 truncate uppercase tracking-tighter font-bold">{{ t('chefActiveTitle') }}</p>
+            <div class="w-8 h-8 rounded-xl bg-brand-600 flex items-center justify-center text-white font-extrabold text-sm shadow-sm shrink-0 uppercase">{{ userProfile().name.charAt(0) }}</div>
+            <div class="min-w-0 flex-1">
+              <p class="text-xs font-bold text-zinc-800 truncate">{{ userProfile().name }}</p>
+              <p class="text-[9px] text-brand-600 font-extrabold tracking-tight uppercase truncate">{{ t('chefActiveTitle').split(' · ')[0] }}</p>
             </div>
           } @else {
-            <div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 font-bold text-xs shadow-inner shrink-0">
+            <div class="w-8 h-8 rounded-xl bg-zinc-200 flex items-center justify-center text-zinc-500 font-bold text-sm shrink-0">
               <span class="material-symbols-outlined text-[16px]">tune</span>
             </div>
-            <div class="flex-1 overflow-hidden">
-              <p class="text-xs font-bold text-gray-900 truncate">{{ t('chefDefault') }}</p>
-              <p class="text-[10px] text-gray-500 truncate uppercase tracking-tighter">{{ t('chefSettings') }}</p>
+            <div class="min-w-0 flex-1">
+              <p class="text-xs font-bold text-zinc-800 truncate">{{ t('chefDefault') }}</p>
+              <p class="text-[9px] text-zinc-400 font-semibold tracking-tight uppercase truncate">{{ t('chefSettings') }}</p>
             </div>
           }
         </div>
+        <span class="material-symbols-outlined text-[16px] text-zinc-400 shrink-0">chevron_right</span>
       </div>
     </div>
   </aside>
 
-  <!-- Main Content Area -->
-  <section class="flex-1 flex flex-col relative bg-white h-[calc(100dvh-64px)] overflow-hidden">
+  <!-- Main Content Frame -->
+  <section class="flex-1 flex flex-col relative bg-white border border-zinc-200/50 rounded-2xl h-[calc(100dvh-112px)] shadow-sm overflow-hidden min-w-0">
     
-    <!-- Chat Tab -->
-    <div [class.hidden]="activeTab() !== 'chat'" class="flex-1 flex flex-col h-full relative">
-      <div #chatContainer class="flex-1 overflow-y-auto px-6 md:px-12 py-8 space-y-6 custom-scrollbar pb-40">
+    <!-- Dialogue / Chat Tab -->
+    <div [class.hidden]="activeTab() !== 'chat'" class="flex-1 flex flex-col h-full relative overflow-hidden">
+      <!-- Bubbles Container -->
+      <div #chatContainer class="flex-1 overflow-y-auto px-4 md:px-8 py-6 space-y-6 custom-scrollbar pb-36">
       
       @for (message of messages(); track message.id) {
         
-        <!-- Chef Message -->
+        <!-- Chef Bubble Interface -->
         @if (message.role === 'chef') {
-          <div class="flex gap-4 max-w-3xl font-sans">
+          <div class="flex gap-3 max-w-4xl">
             @if (message.isBattle) {
-              <div class="w-8 h-8 rounded-full bg-rose-100 flex-shrink-0 flex items-center justify-center text-rose-700 mt-1 border border-rose-300 shadow-sm text-[16px] select-none animate-bounce">🤬</div>
+              <div class="w-8 h-8 rounded-xl bg-rose-50 flex-shrink-0 flex items-center justify-center text-[16px] mt-0.5 border border-rose-150 shadow-sm animate-bounce">🤬</div>
             } @else {
-              <div class="w-8 h-8 rounded-full bg-emerald-100 flex-shrink-0 flex items-center justify-center text-emerald-700 mt-1 border border-emerald-200 shadow-sm text-[16px] select-none">👨‍🍳</div>
+              <div class="w-8 h-8 rounded-xl bg-brand-50 flex-shrink-0 flex items-center justify-center text-[16px] mt-0.5 border border-brand-100 shadow-sm">👨‍🍳</div>
             }
             
-            <div class="space-y-4 w-full w-auto max-w-[calc(100%-40px)]">
+            <div class="space-y-3.5 w-full max-w-[calc(100%-40px)]">
               @if (message.isBattle) {
-                <div class="bg-rose-50 border border-rose-200 rounded-2xl rounded-tl-none p-4 inline-block shadow-md">
-                  <div class="flex items-center gap-1.5 mb-2 font-semibold text-rose-600 text-[11px] tracking-wider uppercase animate-pulse">
-                    <span class="material-symbols-outlined text-[14px] text-rose-500 animate-pulse">bolt</span>
+                <!-- Battle Roast Banner Container -->
+                <div class="bg-gradient-to-r from-rose-50/90 to-orange-50/90 border border-rose-200 rounded-2xl rounded-tl-none p-4 inline-block shadow-sm">
+                  <div class="flex items-center gap-1.5 mb-2 font-extrabold text-rose-600 text-[10px] tracking-widest uppercase">
+                    <span class="material-symbols-outlined text-[14px] text-rose-500 animate-pulse">local_fire_department</span>
                     {{ t('chefInBattle') }}
                   </div>
-                  <!-- Using innerHTML as content might contain styled text like <strong> -->
-                  <p class="text-sm leading-relaxed text-rose-950 font-medium mb-3" [innerHTML]="message.content"></p>
+                  <p class="text-xs md:text-sm leading-relaxed text-rose-950 font-medium mb-3.5" [innerHTML]="message.content"></p>
                   
-                  <button (click)="openBattleArena()" class="flex items-center gap-1.5 bg-gradient-to-r from-rose-600 to-orange-500 hover:from-rose-700 hover:to-orange-600 text-white font-bold text-xs py-1.5 px-3.5 rounded-full shadow-md hover:shadow-lg active:scale-95 transition-all">
-                    <span class="material-symbols-outlined text-[14px] animate-pulse">local_fire_department</span>
+                  <button (click)="openBattleArena()" class="flex items-center gap-1.5 bg-gradient-to-r from-brand-600 to-pink-500 hover:brightness-110 text-white font-extrabold text-[10px] uppercase tracking-wider py-2 px-4 rounded-xl shadow-sm hover:scale-[1.02] active:scale-95 transition-all">
+                    <span class="material-symbols-outlined text-[13px]">bolt</span>
                     {{ t('battleStartButton') }}
                   </button>
                 </div>
               } @else {
-                <div class="bg-gray-100 rounded-2xl rounded-tl-none p-4 inline-block">
-                  <!-- Using innerHTML as content might contain styled text like <strong> -->
-                  <p class="text-sm leading-relaxed text-slate-900" [innerHTML]="message.content"></p>
+                <!-- Standard Chef Response (Classic Light Card) -->
+                <div class="bg-zinc-50 border border-zinc-200/50 rounded-2xl rounded-tl-none px-4 py-3.5 inline-block text-zinc-800 shadow-inner">
+                  <p class="text-xs md:text-sm leading-relaxed" [innerHTML]="message.content"></p>
                 </div>
               }
 
-              <!-- Options -->
+              <!-- Suggested Chef Choice Options -->
               @if (message.type === 'options' && message.options) {
-                <div class="flex flex-wrap gap-2">
+                <div class="flex flex-wrap gap-2 pt-1">
                   @for (option of message.options; track option) {
-                    <button (click)="sendOption(option)" class="px-4 py-2 rounded-lg border border-gray-200 text-gray-700 hover:border-emerald-500 hover:text-emerald-700 hover:bg-emerald-50 hover:shadow-sm transition-all text-sm font-medium bg-white">
+                    <button (click)="sendOption(option)" class="px-4 py-2 rounded-xl border border-zinc-200 text-zinc-700 hover:border-brand-500 hover:text-brand-800 hover:bg-brand-50 hover:shadow-sm active:scale-98 transition-all text-xs font-semibold bg-white">
                       {{ option }}
                     </button>
                   }
                 </div>
               }
 
-              <!-- Recipe Card -->
+              <!-- Elegant HeroUI-styled Recipe Card -->
               @if (message.type === 'recipe' && message.recipe) {
-                <div class="bg-white rounded-xl border border-gray-200 overflow-hidden mt-4 shadow w-full max-w-xl group">
-                  <div class="relative h-48 w-full overflow-hidden bg-gray-100">
+                <div class="bg-white rounded-2xl border border-zinc-200 overflow-hidden mt-4 shadow-sm w-full max-w-xl group">
+                  <div class="relative h-48 w-full overflow-hidden bg-zinc-100">
                     <img [src]="message.recipe.imageUrl" alt="Recipe image" referrerpolicy="no-referrer" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"/>
-                    <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent flex flex-col justify-end p-5">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent flex flex-col justify-end p-5">
                       <div class="flex justify-between items-end">
-                        <h4 class="text-white font-bold text-lg tracking-tight">{{ message.recipe.name }}</h4>
-                        <div class="bg-black/30 backdrop-blur-md border border-white/20 text-white px-2.5 py-1 rounded text-[11px] font-bold flex items-center gap-1 shadow-sm">
-                          <span class="material-symbols-outlined text-[14px]">timer</span> {{ message.recipe.time }}
+                        <h4 class="text-white font-black text-base md:text-lg tracking-tight">{{ message.recipe.name }}</h4>
+                        <div class="bg-black/40 backdrop-blur-md border border-white/20 text-white px-2.5 py-1 rounded-lg text-[10px] font-bold flex items-center gap-1 shadow-sm">
+                          <span class="material-symbols-outlined text-[13px]">timer</span> {{ message.recipe.time }}
                         </div>
                       </div>
                     </div>
                   </div>
                   
-                  <div class="p-5 space-y-6">
-                    <!-- Tags -->
-                    <div class="flex gap-2 flex-wrap">
+                  <div class="p-5 space-y-5">
+                    <!-- Badges -->
+                    <div class="flex gap-1.5 flex-wrap">
                       @for (tag of message.recipe.tags; track tag) {
-                        <span class="px-2 py-1 bg-gray-50 border border-gray-200 text-gray-500 rounded text-[10px] font-bold tracking-wider uppercase shadow-sm">{{ tag }}</span>
+                        <span class="px-2 py-0.5 bg-zinc-50 border border-zinc-200 text-zinc-500 rounded-lg text-[9px] font-extrabold tracking-widest uppercase shadow-sm">{{ tag }}</span>
                       }
                     </div>
                     
-                    <!-- Macros -->
-                    <div class="grid grid-cols-3 gap-4 py-4 border-y border-gray-100">
+                    <!-- Nutrients Dashboard -->
+                    <div class="grid grid-cols-3 gap-2 py-3 border-y border-zinc-100">
                       <div>
-                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">{{ t('calories') }}</p>
-                        <p class="text-slate-900 font-mono font-bold text-lg tracking-tight">{{ message.recipe.calories || '--' }} <span class="text-xs font-sans text-gray-500 font-normal">kcal</span></p>
+                        <p class="text-[9px] font-extrabold text-zinc-400 uppercase tracking-widest mb-1">{{ t('calories') }}</p>
+                        <p class="text-zinc-800 font-mono font-black text-base tracking-tight">{{ message.recipe.calories || '--' }} <span class="text-[10px] font-sans text-zinc-500 font-normal">kcal</span></p>
                       </div>
                       <div>
-                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">{{ t('protein') }}</p>
-                        <p class="text-slate-900 font-mono font-bold text-lg tracking-tight">{{ message.recipe.protein || '--' }} <span class="text-xs font-sans text-gray-500 font-normal">g</span></p>
+                        <p class="text-[9px] font-extrabold text-zinc-400 uppercase tracking-widest mb-1">{{ t('protein') }}</p>
+                        <p class="text-zinc-800 font-mono font-black text-base tracking-tight">{{ message.recipe.protein || '--' }} <span class="text-[10px] font-sans text-zinc-500 font-normal">g</span></p>
                       </div>
                       <div>
-                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">{{ t('carbs') }}</p>
-                        <p class="text-slate-900 font-mono font-bold text-lg tracking-tight">{{ message.recipe.carbs || '--' }} <span class="text-xs font-sans text-gray-500 font-normal">g</span></p>
+                        <p class="text-[9px] font-extrabold text-zinc-400 uppercase tracking-widest mb-1">{{ t('carbs') }}</p>
+                        <p class="text-zinc-800 font-mono font-black text-base tracking-tight">{{ message.recipe.carbs || '--' }} <span class="text-[10px] font-sans text-zinc-500 font-normal">g</span></p>
                       </div>
                     </div>
                     
-                    <!-- Reason -->
-                    <div class="bg-indigo-50 border border-indigo-100/60 p-4 rounded-xl shadow-sm">
-                      <p class="text-[11px] font-bold text-indigo-800 uppercase tracking-widest flex items-center gap-2 mb-2">
-                        <span class="material-symbols-outlined text-[16px]">info</span> {{ t('whyRecipe') }}
+                    <!-- Chef Recommendation reasoning -->
+                    <div class="bg-brand-50/50 border border-brand-100/60 p-4 rounded-2xl shadow-sm">
+                      <p class="text-[10px] font-extrabold text-brand-800 uppercase tracking-wider flex items-center gap-1.5 mb-1.5">
+                        <span class="material-symbols-outlined text-[15px]">info</span> {{ t('whyRecipe') }}
                       </p>
-                      <p class="text-sm text-indigo-900/80 leading-relaxed font-medium">
+                      <p class="text-xs text-brand-950 font-medium leading-relaxed">
                         {{ message.recipe.reason }}
                       </p>
                     </div>
 
-                    <!-- Ingredients -->
-                    <div class="space-y-3">
-                      <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">{{ t('ingredients') }}</p>
-                      <div class="grid grid-cols-2 gap-x-4 gap-y-3 p-5 bg-gray-50 rounded-xl border border-gray-100 shadow-inner">
+                    <!-- Ingredients Checkbox List with explicit seasoning quantities -->
+                    <div class="space-y-2">
+                      <p class="text-[10px] font-extrabold text-zinc-400 uppercase tracking-widest mb-2">{{ t('ingredients') }}</p>
+                      <div class="grid grid-cols-2 gap-x-4 gap-y-2.5 p-4 bg-zinc-50 border border-zinc-200/50 rounded-2xl shadow-inner">
                         @for (ingredient of message.recipe.ingredients; track ingredient.name) {
-                          <div class="flex justify-between items-center text-sm border-b border-gray-200/50 pb-1 last:border-0 last:pb-0">
-                            <span class="text-slate-700 font-medium truncate pr-2 flex-1">{{ ingredient.name }}</span>
-                            <span class="text-gray-500 font-mono text-xs flex-shrink-0 bg-white px-1.5 rounded border border-gray-100 shadow-sm">{{ ingredient.amount }}</span>
+                          <div class="flex justify-between items-center text-xs border-b border-zinc-200/40 pb-1.5 last:border-0 last:pb-0">
+                            <span class="text-zinc-700 font-semibold truncate pr-2 flex-1">{{ ingredient.name }}</span>
+                            <span class="text-zinc-500 font-mono text-[10px] flex-shrink-0 bg-white px-1.5 py-0.5 rounded-lg border border-zinc-250 shadow-sm">{{ ingredient.amount }}</span>
                           </div>
                         }
                       </div>
                     </div>
 
-                    <!-- Steps -->
-                    <div class="space-y-4 pt-2">
-                      <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">{{ t('instructions') }}</p>
-                      <ul class="space-y-4">
+                    <!-- Structured Steps -->
+                    <div class="space-y-3.5 pt-1">
+                      <p class="text-[10px] font-extrabold text-zinc-400 uppercase tracking-widest">{{ t('instructions') }}</p>
+                      <ul class="space-y-3.5">
                         @for (step of message.recipe.steps; track step; let i = $index) {
-                          <li class="flex gap-4">
-                            <span class="w-7 h-7 rounded-lg bg-gray-100 border border-gray-200 text-gray-500 text-[11px] flex items-center justify-center font-bold flex-shrink-0 shadow-sm">{{ (i + 1 < 10 ? '0' : '') + (i + 1) }}</span>
-                            <p class="text-sm text-slate-700 leading-relaxed pt-1">{{ step }}</p>
+                          <li class="flex gap-3">
+                            <span class="w-6 h-6 rounded-lg bg-zinc-100 border border-zinc-200 text-zinc-500 text-[10px] flex items-center justify-center font-black shrink-0 shadow-sm">{{ i + 1 }}</span>
+                            <p class="text-xs text-zinc-700 leading-relaxed pt-0.5">{{ step }}</p>
                           </li>
                         }
                       </ul>
                     </div>
 
-                    <!-- Feedback & Saving -->
-                    <div class="mt-4 pt-4 border-t border-gray-100 flex items-center justify-between">
+                    <!-- Actions & Review Feedback -->
+                    <div class="mt-4 pt-4 border-t border-zinc-100 flex items-center justify-between">
                       <div class="flex items-center gap-2">
                         @if (isRecipeSaved(message.recipe.name)) {
-                          <button class="px-3 py-1.5 rounded bg-gray-100 text-gray-500 text-xs font-bold flex items-center gap-1 shadow-sm cursor-default">
+                          <button class="px-4 py-2 rounded-xl bg-zinc-100 text-zinc-500 text-xs font-bold flex items-center gap-1 shadow-sm cursor-default">
                             <span class="material-symbols-outlined text-[14px]">check</span> {{ t('saved') }}
                           </button>
                         } @else {
-                          <button (click)="addRecipeToLibrary(message.recipe)" class="px-3 py-1.5 rounded bg-emerald-50 text-emerald-600 border border-emerald-200 hover:bg-emerald-100 hover:border-emerald-300 text-xs font-bold transition-colors flex items-center gap-1 shadow-sm">
+                          <button (click)="addRecipeToLibrary(message.recipe)" class="px-4 py-2 rounded-xl bg-brand-50 text-brand-600 border border-brand-200 hover:bg-brand-100 hover:border-brand-300 text-xs font-bold transition-all flex items-center gap-1 shadow-sm active:scale-95">
                             <span class="material-symbols-outlined text-[14px]">bookmark_add</span> {{ t('saveRecipe') }}
                           </button>
                         }
                       </div>
-                      <div class="flex items-center gap-2">
-                        <span class="text-xs text-gray-400 font-medium tracking-wide">{{ t('feedbackPrompt') }}</span>
+                      <div class="flex items-center gap-1.5">
+                        <span class="text-[10px] text-zinc-400 font-bold tracking-tight">{{ t('feedbackPrompt') }}</span>
                         <button (click)="submitFeedback(message.id, 'like')" 
-                                [class.text-emerald-600]="message.feedback === 'like'"
-                                [class.bg-emerald-50]="message.feedback === 'like'"
-                                [class.border-emerald-200]="message.feedback === 'like'"
-                                class="p-2 rounded-lg border border-gray-200 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 transition-colors shadow-sm flex items-center justify-center">
-                          <span class="material-symbols-outlined text-[18px]">thumb_up</span>
+                                [class.text-brand-600]="message.feedback === 'like'"
+                                [class.bg-brand-50]="message.feedback === 'like'"
+                                [class.border-brand-200]="message.feedback === 'like'"
+                                class="p-2 rounded-xl border border-zinc-200 text-zinc-400 hover:text-brand-600 hover:bg-brand-50 transition-all shadow-sm flex items-center justify-center active:scale-90">
+                          <span class="material-symbols-outlined text-[16px]">thumb_up</span>
                         </button>
                         <button (click)="submitFeedback(message.id, 'dislike')" 
                                 [class.text-rose-600]="message.feedback === 'dislike'"
                                 [class.bg-rose-50]="message.feedback === 'dislike'"
                                 [class.border-rose-200]="message.feedback === 'dislike'"
-                                class="p-2 rounded-lg border border-gray-200 text-gray-400 hover:text-rose-600 hover:bg-rose-50 transition-colors shadow-sm flex items-center justify-center">
-                          <span class="material-symbols-outlined text-[18px]">thumb_down</span>
+                                class="p-2 rounded-xl border border-zinc-200 text-zinc-400 hover:text-rose-600 hover:bg-rose-50 transition-all shadow-sm flex items-center justify-center active:scale-90">
+                          <span class="material-symbols-outlined text-[16px]">thumb_down</span>
                         </button>
                       </div>
                     </div>
@@ -274,369 +294,374 @@
           </div>
         }
 
-        <!-- User Message -->
+        <!-- User Bubble Layout -->
         @if (message.role === 'user') {
-          <div class="flex gap-4 max-w-3xl ml-auto justify-end">
-            <div class="bg-emerald-600 text-white rounded-2xl rounded-tr-none p-4 shadow-md text-right mt-1 border border-emerald-700/50 max-w-[calc(100%-40px)]">
-              <p class="text-sm leading-relaxed font-medium">{{ message.content }}</p>
+          <div class="flex gap-3 max-w-4xl ml-auto justify-end">
+            <div class="bg-gradient-to-tr from-brand-600 to-pink-500 text-white rounded-2xl rounded-tr-none px-4 py-3.5 shadow-sm border border-brand-700/10 max-w-[85%]">
+              <p class="text-xs md:text-sm leading-relaxed font-semibold">{{ message.content }}</p>
               @if (message.audioUrl) {
                 <div class="mt-3 text-left w-full relative group">
-                  <audio [src]="getSafeUrl(message.audioUrl)" controls class="h-8 max-w-full rounded-full border border-emerald-400 outline-none w-56 custom-audio opacity-90 hover:opacity-100 transition-opacity"></audio>
+                  <audio [src]="getSafeUrl(message.audioUrl)" controls class="h-8 max-w-full rounded-full border border-white/20 outline-none w-52 opacity-90"></audio>
                 </div>
               }
             </div>
-            <div class="w-8 h-8 rounded-full bg-slate-100 border border-slate-200 flex-shrink-0 flex items-center justify-center text-slate-600 font-bold text-xs mt-1 shadow-sm">ME</div>
+            <div class="w-8 h-8 rounded-xl bg-zinc-150 border border-zinc-200 flex-shrink-0 flex items-center justify-center text-zinc-600 font-extrabold text-[10px] shadow-sm select-none">ME</div>
           </div>
         }
       }
 
-      <!-- Loading State -->
+      <!-- Interactive Cooking Loading Bar -->
       @if (isLoading()) {
-        <div class="flex gap-4 max-w-3xl">
-          <div class="w-8 h-8 rounded-full bg-emerald-100 flex-shrink-0 flex items-center justify-center text-emerald-700 mt-1 border border-emerald-200 shadow-sm text-[16px]">👨‍🍳</div>
-          <div class="bg-gray-100 rounded-2xl rounded-tl-none p-4 inline-block w-20 flex items-center justify-center mt-1 h-12">
-            <div class="flex gap-1.5 items-center h-full">
-              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" style="animation-duration: 1s"></span>
-              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" style="animation-duration: 1s; animation-delay: 0.2s"></span>
-              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" style="animation-duration: 1s; animation-delay: 0.4s"></span>
+        <div class="flex gap-3 max-w-4xl">
+          <div class="w-8 h-8 rounded-xl bg-brand-50 flex-shrink-0 flex items-center justify-center text-[16px] border border-brand-100 shadow-sm">👨‍🍳</div>
+          <div class="bg-zinc-50 border border-zinc-200/50 rounded-2xl rounded-tl-none p-4 inline-block w-20 flex items-center justify-center h-11">
+            <div class="flex gap-1.5 items-center justify-center">
+              <span class="w-1.5 h-1.5 rounded-full bg-brand-500 animate-pulse" style="animation-duration: 0.8s"></span>
+              <span class="w-1.5 h-1.5 rounded-full bg-brand-500 animate-pulse" style="animation-duration: 0.8s; animation-delay: 0.15s"></span>
+              <span class="w-1.5 h-1.5 rounded-full bg-brand-500 animate-pulse" style="animation-duration: 0.8s; animation-delay: 0.3s"></span>
             </div>
           </div>
         </div>
       }
     </div>
 
-      <!-- Input Area -->
-      <div class="absolute bottom-0 w-full p-6 bg-gradient-to-t from-white via-white to-transparent pt-12 z-10">
-        <div class="max-w-3xl mx-auto relative px-2 md:px-0">
-          <form (submit)="sendMessage($event)" class="relative w-full shadow-lg rounded-xl">
-            <input 
-              type="text" 
-              [(ngModel)]="userInput"
-              name="userInput"
-              autocomplete="off"
-              class="w-full pl-6 pr-44 py-4 bg-gray-50 border border-gray-200 rounded-xl focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/10 focus:outline-none text-sm font-sans transition-all" 
-              placeholder="{{ isRecording() ? t('inputListening') : t('inputPlaceholder') }}" 
-              [disabled]="isLoading() && !isRecording()"
-            />
-            
-            <div class="absolute right-1.5 top-1.5 bottom-1.5 flex items-center gap-1.5">
-              <button type="button" (click)="toggleRecording()" [disabled]="isLoading()" [class.bg-rose-50]="isRecording()" [class.text-rose-600]="isRecording()" [class.text-gray-400]="!isRecording()" class="h-full px-3 rounded-lg hover:bg-gray-200 transition-colors flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed border border-transparent" [class.border-rose-200]="isRecording()" [class.animate-pulse]="isRecording()">
-                <span class="material-symbols-outlined">{{ isRecording() ? 'stop_circle' : 'mic' }}</span>
-              </button>
-              <button type="submit" [disabled]="!userInput() || isLoading() && !isRecording()" class="h-full px-5 bg-emerald-600 text-white rounded-lg text-[11px] font-bold hover:bg-emerald-500 transition-colors disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed flex items-center justify-center tracking-wider shadow-sm uppercase">
-                {{ t('send') }}
-              </button>
+    <!-- Bottom Action Console (HeroUI Glass Console) -->
+    <div class="absolute bottom-0 w-full p-6 bg-gradient-to-t from-white via-white to-transparent pt-12 z-10">
+      <div class="max-w-3xl mx-auto relative">
+        <form (submit)="sendMessage($event)" class="relative w-full shadow-lg rounded-2xl">
+          <input 
+            type="text" 
+            [(ngModel)]="userInput"
+            name="userInput"
+            autocomplete="off"
+            class="w-full pl-5 pr-44 py-4 bg-zinc-100/60 hover:bg-zinc-100 focus:bg-white border border-zinc-200/60 rounded-2xl focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 focus:outline-none text-xs md:text-sm transition-all shadow-inner" 
+            placeholder="{{ isRecording() ? t('inputListening') : t('inputPlaceholder') }}" 
+            [disabled]="isLoading() && !isRecording()"
+          />
+          
+          <div class="absolute right-2 top-1.5 bottom-1.5 flex items-center gap-1.5">
+            <button type="button" (click)="toggleRecording()" [disabled]="isLoading()" [class.bg-rose-50]="isRecording()" [class.text-rose-600]="isRecording()" [class.text-zinc-400]="!isRecording()" class="h-full px-3.5 rounded-xl hover:bg-zinc-200/50 active:scale-95 transition-all flex items-center justify-center disabled:opacity-50 border border-transparent" [class.border-rose-200]="isRecording()" [class.animate-pulse]="isRecording()">
+              <span class="material-symbols-outlined text-[18px]">{{ isRecording() ? 'stop_circle' : 'mic' }}</span>
+            </button>
+            <button type="submit" [disabled]="!userInput() || isLoading() && !isRecording()" class="h-full px-5 bg-gradient-to-r from-brand-600 to-pink-500 text-white rounded-xl text-xs font-bold hover:brightness-105 transition-all disabled:bg-zinc-200 disabled:text-zinc-400 disabled:cursor-not-allowed flex items-center justify-center tracking-wider active:scale-95 shadow-sm uppercase">
+              {{ t('send') }}
+            </button>
+          </div>
+        </form>
+        <div class="mt-3 flex justify-center items-center gap-1.5 text-center text-[9px] text-zinc-400 uppercase tracking-widest font-black">
+          <span class="material-symbols-outlined text-[12px] text-brand-500 animate-pulse">bolt</span> 
+          <span>Powered by DeepChef Engine</span>
+        </div>
+      </div>
+    </div>
+  </div> <!-- End Dialogue Chat Tab -->
+
+  <!-- Saved Recipes Library Tab -->
+  <div [class.hidden]="activeTab() !== 'library'" class="flex-1 overflow-y-auto p-5 md:p-10 pb-24 h-full bg-zinc-50/50 custom-scrollbar">
+    <div class="max-w-5xl mx-auto">
+      <h2 class="text-xl md:text-2xl font-black text-zinc-800 mb-8 flex items-center gap-3">
+        <span class="material-symbols-outlined text-brand-600 bg-brand-50 p-2.5 rounded-xl border border-brand-100">menu_book</span>
+        {{ t('libraryTitle') }}
+      </h2>
+
+      @if (savedRecipes().length === 0) {
+        <div class="text-center py-20 bg-white rounded-2xl border border-zinc-200/50 shadow-sm p-6">
+          <span class="material-symbols-outlined text-5xl text-zinc-300 mb-3 block">receipt_long</span>
+          <p class="text-zinc-500 font-semibold text-sm">{{ t('libraryEmpty') }}</p>
+          <p class="text-xs text-zinc-400 mt-1 max-w-xs mx-auto">{{ t('libraryEmptySub') }}</p>
+        </div>
+      } @else {
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 animate-fade-in">
+          @for (recipe of savedRecipes(); track recipe.id) {
+            <div class="bg-white rounded-2xl border border-zinc-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow group flex flex-col sm:flex-row">
+              <div class="sm:w-44 h-44 sm:h-auto relative shrink-0">
+                 <img [src]="recipe.imageUrl" referrerpolicy="no-referrer" alt="Recipe image" class="w-full h-full object-cover group-hover:scale-102 transition-transform duration-500"/>
+                 <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent sm:hidden"></div>
+              </div>
+              <div class="p-5 flex-1 flex flex-col">
+                <div class="flex justify-between items-start mb-2">
+                  <h3 class="text-base font-black text-zinc-800">{{ recipe.name }}</h3>
+                  <button (click)="removeRecipe(recipe.id)" class="text-zinc-450 hover:text-rose-500 transition-colors p-1" title="移除">
+                    <span class="material-symbols-outlined text-[18px]">delete</span>
+                  </button>
+                </div>
+                <div class="flex gap-2 mb-3.5 flex-wrap">
+                  <span class="bg-brand-50 text-brand-700 text-[10px] font-bold px-2 py-0.5 rounded-lg border border-brand-100 flex items-center gap-1">
+                    <span class="material-symbols-outlined text-[12px]">timer</span> {{ recipe.time }}
+                  </span>
+                  <span class="bg-orange-50 text-orange-700 text-[10px] font-bold px-2 py-0.5 rounded-lg border border-orange-100 flex items-center gap-1">
+                    <span class="material-symbols-outlined text-[12px]">local_fire_department</span> {{ recipe.calories }} kcal
+                  </span>
+                </div>
+                
+                <p class="text-xs text-zinc-500 mb-4 line-clamp-2 leading-relaxed">{{ recipe.reason }}</p>
+                
+                <div class="mt-auto pt-3 border-t border-zinc-100">
+                  <p class="text-[9px] font-extrabold text-zinc-400 mb-1.5 uppercase tracking-widest">{{ t('mainIngredients') }}</p>
+                  <p class="text-xs text-zinc-700 truncate font-semibold">
+                    @for (ing of recipe.ingredients; track ing.name; let last = $last) {
+                      {{ ing.name }}{{ !last ? ', ' : '' }}
+                    }
+                  </p>
+                </div>
+              </div>
             </div>
-          </form>
-          <div class="mt-3 flex justify-center items-center gap-1.5 text-center text-[10px] text-gray-400 uppercase tracking-widest font-bold">
-            <span class="material-symbols-outlined text-[12px] text-emerald-500">bolt</span> 
-            <span>Powered by DeepChef Engine</span>
+          }
+        </div>
+      }
+    </div>
+  </div> <!-- End Library Tab -->
+
+  <!-- Pantry / Foods Tab -->
+  <div [class.hidden]="activeTab() !== 'pantry'" class="flex-1 overflow-y-auto p-5 md:p-10 pb-24 h-full bg-zinc-50/50 custom-scrollbar">
+    <div class="max-w-4xl mx-auto">
+      <h2 class="text-xl md:text-2xl font-black text-zinc-800 mb-8 flex items-center gap-3">
+        <span class="material-symbols-outlined text-orange-500 bg-orange-50 p-2.5 rounded-xl border border-orange-100">kitchen</span>
+        {{ t('pantryTitle') }}
+      </h2>
+
+      <!-- Add New Item Card Panel -->
+      <div class="bg-white rounded-2xl border border-zinc-200 p-5 md:p-6 shadow-sm mb-6">
+        <h3 class="text-xs font-black text-zinc-700 mb-4 uppercase tracking-widest">{{ t('addPantryTitle') }}</h3>
+        <div class="flex flex-col sm:flex-row gap-4 items-end">
+          <div class="flex-1 w-full">
+            <label class="block text-[10px] font-extrabold text-zinc-400 uppercase tracking-widest mb-2">{{ t('pantryItemName') }}</label>
+            <input type="text" [(ngModel)]="newPantryItemName" [placeholder]="t('pantryItemNamePlaceholder')" class="w-full px-4 py-2.5 bg-zinc-50 border border-zinc-200 rounded-xl focus:border-brand-500 focus:bg-white focus:ring-4 focus:ring-brand-500/10 outline-none text-xs transition-all shadow-inner">
+          </div>
+          <div class="w-full sm:w-44">
+            <label class="block text-[10px] font-extrabold text-zinc-400 uppercase tracking-widest mb-2">{{ t('pantryItemAmount') }}</label>
+            <input type="text" [(ngModel)]="newPantryItemAmount" [placeholder]="t('pantryItemAmountPlaceholder')" class="w-full px-4 py-2.5 bg-zinc-50 border border-zinc-200 rounded-xl focus:border-brand-500 focus:bg-white focus:ring-4 focus:ring-brand-500/10 outline-none text-xs transition-all shadow-inner">
+          </div>
+          <div class="flex w-full sm:w-auto gap-2">
+            @if (editingPantryId()) {
+              <button (click)="cancelEditPantry()" class="px-5 py-2.5 bg-zinc-100 hover:bg-zinc-200/80 text-zinc-600 font-bold text-xs rounded-xl transition-all shadow-sm active:scale-95 uppercase tracking-wide">
+                {{ t('cancel') }}
+              </button>
+            }
+            <button (click)="addPantryItem()" [disabled]="!newPantryItemName().trim()" class="flex-1 sm:flex-auto px-6 py-2.5 bg-brand-600 text-white font-bold text-xs rounded-xl hover:bg-brand-700 transition-all shadow-sm active:scale-95 disabled:opacity-50 disabled:scale-100 uppercase tracking-wide">
+              {{ editingPantryId() ? t('saveChanges') : t('add') }}
+            </button>
           </div>
         </div>
       </div>
-    </div> <!-- End Chat Tab -->
 
-    <!-- Library Tab -->
-    <div [class.hidden]="activeTab() !== 'library'" class="flex-1 overflow-y-auto p-6 md:p-12 pb-24 h-full bg-slate-50 custom-scrollbar">
-      <div class="max-w-5xl mx-auto">
-        <h2 class="text-2xl font-bold text-slate-800 mb-8 flex items-center gap-3">
-          <span class="material-symbols-outlined text-emerald-600 bg-emerald-100 p-2 rounded-lg">menu_book</span>
-          {{ t('libraryTitle') }}
-        </h2>
-
-        @if (savedRecipes().length === 0) {
-          <div class="text-center py-20 bg-white rounded-2xl border border-gray-200 shadow-sm">
-            <span class="material-symbols-outlined text-6xl text-gray-300 mb-4 block">receipt_long</span>
-            <p class="text-gray-500 font-medium">{{ t('libraryEmpty') }}</p>
-            <p class="text-sm text-gray-400 mt-2">{{ t('libraryEmptySub') }}</p>
-          </div>
-        } @else {
-          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            @for (recipe of savedRecipes(); track recipe.id) {
-              <div class="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow group flex flex-col sm:flex-row">
-                <div class="sm:w-48 h-48 sm:h-auto relative shrink-0">
-                   <img [src]="recipe.imageUrl" referrerpolicy="no-referrer" class="w-full h-full object-cover"/>
-                   <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent sm:hidden"></div>
-                </div>
-                <div class="p-5 flex-1 flex flex-col">
-                  <div class="flex justify-between items-start mb-2">
-                    <h3 class="text-lg font-bold text-slate-800">{{ recipe.name }}</h3>
-                    <button (click)="removeRecipe(recipe.id)" class="text-gray-400 hover:text-rose-500 transition-colors p-1" title="移除">
-                      <span class="material-symbols-outlined text-[20px]">delete</span>
-                    </button>
-                  </div>
-                  <div class="flex gap-2 mb-4 flex-wrap">
-                    <span class="bg-emerald-50 text-emerald-700 text-[10px] font-bold px-2 py-0.5 rounded border border-emerald-100 flex items-center gap-1">
-                      <span class="material-symbols-outlined text-[12px]">timer</span> {{ recipe.time }}
-                    </span>
-                    <span class="bg-orange-50 text-orange-700 text-[10px] font-bold px-2 py-0.5 rounded border border-orange-100 flex items-center gap-1">
-                      <span class="material-symbols-outlined text-[12px]">local_fire_department</span> {{ recipe.calories }} kcal
-                    </span>
-                  </div>
-                  
-                  <div class="text-sm text-gray-600 mb-4 line-clamp-2">{{ recipe.reason }}</div>
-                  
-                  <div class="mt-auto pt-4 border-t border-gray-100">
-                    <p class="text-xs font-bold text-gray-500 mb-2">{{ t('mainIngredients') }}</p>
-                    <p class="text-sm text-slate-700 truncate">
-                      @for (ing of recipe.ingredients; track ing.name; let last = $last) {
-                        {{ ing.name }}{{ !last ? ', ' : '' }}
-                      }
-                    </p>
-                  </div>
-                </div>
-              </div>
-            }
-          </div>
-        }
-      </div>
-    </div> <!-- End Library Tab -->
-
-    <!-- Pantry Tab -->
-    <div [class.hidden]="activeTab() !== 'pantry'" class="flex-1 overflow-y-auto p-6 md:p-12 pb-24 h-full bg-slate-50 custom-scrollbar">
-      <div class="max-w-4xl mx-auto">
-        <h2 class="text-2xl font-bold text-slate-800 mb-8 flex items-center gap-3">
-          <span class="material-symbols-outlined text-orange-500 bg-orange-100 p-2 rounded-lg">kitchen</span>
-          {{ t('pantryTitle') }}
-        </h2>
-
-        <div class="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm mb-8">
-          <h3 class="text-sm font-bold text-gray-700 mb-4">{{ t('addPantryTitle') }}</h3>
-          <div class="flex flex-col sm:flex-row gap-4 items-end">
-            <div class="flex-1 w-full">
-              <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">{{ t('pantryItemName') }}</label>
-              <input type="text" [(ngModel)]="newPantryItemName" [placeholder]="t('pantryItemNamePlaceholder')" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/10 outline-none text-sm transition-all">
-            </div>
-            <div class="w-full sm:w-48">
-              <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">{{ t('pantryItemAmount') }}</label>
-              <input type="text" [(ngModel)]="newPantryItemAmount" [placeholder]="t('pantryItemAmountPlaceholder')" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/10 outline-none text-sm transition-all">
-            </div>
-            <div class="flex w-full sm:w-auto gap-2">
-              @if (editingPantryId()) {
-                <button (click)="cancelEditPantry()" class="px-6 py-2.5 bg-gray-100 text-gray-600 font-bold text-sm rounded-xl hover:bg-gray-200 transition-colors shadow-sm">
-                  {{ t('cancel') }}
-                </button>
-              }
-              <button (click)="addPantryItem()" [disabled]="!newPantryItemName().trim()" class="flex-1 sm:flex-auto px-6 py-2.5 bg-emerald-600 text-white font-bold text-sm rounded-xl hover:bg-emerald-700 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed">
-                {{ editingPantryId() ? t('saveChanges') : t('add') }}
-              </button>
-            </div>
-          </div>
+      <!-- Ingredient Items Grid -->
+      @if (pantryItems().length === 0) {
+        <div class="text-center py-16">
+          <p class="text-zinc-450 text-xs font-semibold italic">{{ t('pantryEmpty') }}</p>
         </div>
-
-        @if (pantryItems().length === 0) {
-          <div class="text-center py-16">
-            <p class="text-gray-500 font-medium">{{ t('pantryEmpty') }}</p>
-          </div>
-        } @else {
-          <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            @for (item of pantryItems(); track item.id) {
-              <div class="bg-white border border-gray-200 p-4 rounded-xl shadow-sm flex items-start justify-between group hover:border-emerald-300 transition-colors">
-                <div>
-                  <h4 class="font-bold text-slate-800">{{ item.name }}</h4>
-                  <p class="text-xs text-gray-500 mt-1 font-mono bg-gray-100 inline-block px-1.5 rounded">{{ item.amount || t('pantryItemAmountFallback') }}</p>
-                </div>
-                <div class="flex gap-1 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity">
-                   <button (click)="editPantryItem(item)" class="text-gray-400 hover:text-emerald-600 transition-colors p-1" title="修改">
-                     <span class="material-symbols-outlined text-[18px]">edit</span>
-                   </button>
-                   <button (click)="removePantryItem(item.id)" class="text-gray-400 hover:text-rose-500 transition-colors p-1" title="删除">
-                     <span class="material-symbols-outlined text-[18px]">delete</span>
-                   </button>
-                </div>
+      } @else {
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 animate-fade-in">
+          @for (item of pantryItems(); track item.id) {
+            <div class="bg-white border border-zinc-250 p-4 rounded-xl shadow-sm flex items-start justify-between group hover:border-brand-300 transition-all">
+              <div class="min-w-0 pr-2">
+                <h4 class="font-bold text-zinc-800 text-sm truncate">{{ item.name }}</h4>
+                <p class="text-[10px] text-zinc-500 mt-1 font-mono bg-zinc-100 inline-block px-1.5 py-0.5 rounded-lg border border-black/5 truncate max-w-full">
+                  {{ item.amount || t('pantryItemAmountFallback') }}
+                </p>
               </div>
-            }
-          </div>
-        }
-      </div>
-    </div> <!-- End Pantry Tab -->
+              <div class="flex gap-0.5 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity">
+                 <button (click)="editPantryItem(item)" class="text-zinc-400 hover:text-brand-650 transition-colors p-1" title="修改">
+                   <span class="material-symbols-outlined text-[16px]">edit</span>
+                 </button>
+                 <button (click)="removePantryItem(item.id)" class="text-zinc-400 hover:text-rose-500 transition-colors p-1" title="删除">
+                   <span class="material-symbols-outlined text-[16px]">delete</span>
+                 </button>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  </div> <!-- End Pantry Tab -->
 
   </section>
 </main>
 
-<!-- Profile Modal -->
+<!-- Complete Profile Modal (HeroUI Dark Overlay Backdrop) -->
 @if (showProfileModal()) {
-  <div class="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
-    <div class="bg-white rounded-2xl w-full max-w-md p-6 shadow-xl border border-gray-100 relative">
-      <button (click)="showProfileModal.set(false)" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
-        <span class="material-symbols-outlined">close</span>
+  <div class="fixed inset-0 z-[100] flex items-center justify-center bg-zinc-950/40 backdrop-blur-sm px-4">
+    <div class="bg-white rounded-2xl w-full max-w-md p-6 shadow-xl border border-zinc-200/50 relative animate-fade-in">
+      <button (click)="showProfileModal.set(false)" class="absolute top-4 right-4 w-8 h-8 rounded-xl flex items-center justify-center text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100/60 active:scale-90 transition-all">
+        <span class="material-symbols-outlined text-[18px]">close</span>
       </button>
-      <h3 class="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
-        <span class="material-symbols-outlined text-emerald-600">tune</span>
+      <h3 class="text-lg font-black text-zinc-900 mb-6 flex items-center gap-2">
+        <span class="material-symbols-outlined text-brand-600 bg-brand-50 p-1.5 rounded-lg border border-brand-100">tune</span>
         {{ t('profileTitle') }}
       </h3>
       
       <div class="space-y-4">
         <div>
-          <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">{{ t('profileName') }}</label>
-          <input type="text" [(ngModel)]="tempProfile.name" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/10 outline-none text-sm transition-all" [placeholder]="t('profileNamePlaceholder')">
+          <label class="block text-[10px] font-extrabold text-zinc-400 uppercase tracking-widest mb-2">{{ t('profileName') }}</label>
+          <input type="text" [(ngModel)]="tempProfile.name" class="w-full px-4 py-2.5 bg-zinc-50 border border-zinc-200 rounded-xl focus:border-brand-500 focus:bg-white focus:ring-4 focus:ring-brand-500/10 outline-none text-xs transition-all shadow-inner" [placeholder]="t('profileNamePlaceholder')">
         </div>
         <div>
-          <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">{{ t('profileFamily') }}</label>
-          <input type="number" [(ngModel)]="tempProfile.familyMembers" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/10 outline-none text-sm transition-all" [placeholder]="t('profileFamilyPlaceholder')">
+          <label class="block text-[10px] font-extrabold text-zinc-400 uppercase tracking-widest mb-2">{{ t('profileFamily') }}</label>
+          <input type="number" [(ngModel)]="tempProfile.familyMembers" class="w-full px-4 py-2.5 bg-zinc-50 border border-zinc-200 rounded-xl focus:border-brand-500 focus:bg-white focus:ring-4 focus:ring-brand-500/10 outline-none text-xs transition-all shadow-inner" [placeholder]="t('profileFamilyPlaceholder')">
         </div>
         <div>
-          <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">{{ t('profileFavorite') }}</label>
-          <input type="text" [(ngModel)]="tempProfile.favoriteFoods" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/10 outline-none text-sm transition-all" [placeholder]="t('profileFavoritePlaceholder')">
+          <label class="block text-[10px] font-extrabold text-zinc-400 uppercase tracking-widest mb-2">{{ t('profileFavorite') }}</label>
+          <input type="text" [(ngModel)]="tempProfile.favoriteFoods" class="w-full px-4 py-2.5 bg-zinc-50 border border-zinc-200 rounded-xl focus:border-brand-500 focus:bg-white focus:ring-4 focus:ring-brand-500/10 outline-none text-xs transition-all shadow-inner" [placeholder]="t('profileFavoritePlaceholder')">
         </div>
         <div>
-          <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">{{ t('profileFlavor') }}</label>
-          <input type="text" [(ngModel)]="tempProfile.flavorPreferences" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/10 outline-none text-sm transition-all" [placeholder]="t('profileFlavorPlaceholder')">
+          <label class="block text-[10px] font-extrabold text-zinc-400 uppercase tracking-widest mb-2">{{ t('profileFlavor') }}</label>
+          <input type="text" [(ngModel)]="tempProfile.flavorPreferences" class="w-full px-4 py-2.5 bg-zinc-50 border border-zinc-200 rounded-xl focus:border-brand-500 focus:bg-white focus:ring-4 focus:ring-brand-500/10 outline-none text-xs transition-all shadow-inner" [placeholder]="t('profileFlavorPlaceholder')">
         </div>
       </div>
       
-      <div class="mt-8 flex justify-between items-center">
-        <button (click)="logout()" class="text-xs font-bold text-rose-500 hover:text-rose-600 transition-colors">{{ t('logout') }}</button>
-        <div class="flex gap-3">
-          <button (click)="showProfileModal.set(false)" class="px-5 py-2.5 text-sm font-bold text-gray-500 hover:bg-gray-100 rounded-lg transition-colors">{{ t('cancel') }}</button>
-          <button (click)="saveProfile()" class="px-4 py-2.5 bg-emerald-600 text-white text-sm font-bold rounded-lg hover:bg-emerald-700 transition-colors shadow-sm">{{ t('saveAndApply') }}</button>
+      <div class="mt-8 flex justify-between items-center pt-4 border-t border-zinc-100">
+        <button (click)="logout()" class="text-xs font-black text-rose-500 hover:text-rose-600 transition-colors uppercase tracking-wider">{{ t('logout') }}</button>
+        <div class="flex gap-2">
+          <button (click)="showProfileModal.set(false)" class="px-4 py-2.5 text-xs font-bold text-zinc-500 hover:bg-zinc-100/65 rounded-xl transition-all">{{ t('cancel') }}</button>
+          <button (click)="saveProfile()" class="px-5 py-2.5 bg-brand-600 text-white text-xs font-bold rounded-xl hover:bg-brand-700 transition-all shadow-sm active:scale-95 uppercase tracking-wide">{{ t('saveAndApply') }}</button>
         </div>
       </div>
     </div>
   </div>
 }
 
-<!-- Kitchen Battle Arena Modal -->
+<!-- Kitchen Battle Arena Panel (Immersive Glass-Backdrop Overlay) -->
 @if (showBattleModal()) {
-  <div class="fixed inset-0 z-[110] flex items-center justify-center bg-slate-950/80 backdrop-blur-md px-4 py-6">
-    <div class="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-2xl h-[90vh] md:h-[80vh] flex flex-col shadow-2xl overflow-hidden font-sans">
+  <div class="fixed inset-0 z-[110] flex items-center justify-center bg-zinc-950/80 backdrop-blur-md px-4 py-6">
+    <div class="bg-zinc-900 border border-zinc-800 rounded-3xl w-full max-w-2xl h-[90vh] md:h-[80vh] flex flex-col shadow-2xl overflow-hidden font-sans relative">
       
-      <!-- Modal Header -->
-      <div class="px-6 py-4 border-b border-slate-800 flex items-center justify-between bg-slate-900/50 backdrop-blur-sm">
+      <!-- Back Header -->
+      <div class="px-6 py-4.5 border-b border-zinc-800 flex items-center justify-between bg-zinc-900/50 backdrop-blur-sm">
         <div class="flex items-center gap-2">
-          <div class="w-8 h-8 rounded-full bg-orange-500/10 border border-orange-500/30 flex items-center justify-center text-orange-400 animate-pulse">
+          <div class="w-8 h-8 rounded-xl bg-orange-500/10 border border-orange-500/30 flex items-center justify-center text-orange-400 animate-pulse">
             <span class="material-symbols-outlined text-[18px]">local_fire_department</span>
           </div>
-          <h3 class="text-md font-extrabold text-slate-100 tracking-tight">
+          <h3 class="text-normal font-black text-zinc-100 tracking-tight">
             {{ t('battleTitle') }}
           </h3>
         </div>
-        <button (click)="showBattleModal.set(false)" class="flex items-center gap-1 text-xs text-slate-400 hover:text-white px-3 py-1.5 rounded-lg bg-slate-800/60 hover:bg-slate-800 transition-colors">
-          <span class="material-symbols-outlined text-[14px]">close</span>
+        <button (click)="showBattleModal.set(false)" class="flex items-center gap-1 text-[10px] uppercase font-bold tracking-widest text-zinc-400 hover:text-white px-3.5 py-2 rounded-xl bg-zinc-800/60 hover:bg-zinc-800 transition-all active:scale-95">
+          <span class="material-symbols-outlined text-[13px]">close</span>
           {{ t('battleClose') }}
         </button>
       </div>
 
-      <!-- Step 1: Language Picker -->
+      <!-- Stage 1: Native Language Selector -->
       @if (battleStep() === 'lang') {
         <div class="flex-1 p-6 md:p-8 flex flex-col justify-center max-w-lg mx-auto">
           <div class="text-center mb-8">
             <p class="text-[32px] mb-3 select-none">🔥🤬🍳</p>
-            <h4 class="text-sm font-bold bg-gradient-to-r from-orange-400 to-rose-400 bg-clip-text text-transparent uppercase tracking-wider mb-2">
+            <h4 class="text-xs font-black bg-gradient-to-r from-orange-400 to-rose-400 bg-clip-text text-transparent uppercase tracking-widest mb-2">
               Kitchen Battle Mode
             </h4>
-            <p class="text-sm text-slate-400">
+            <p class="text-xs md:text-sm text-zinc-400 leading-relaxed font-semibold">
               {{ t('battlePickLangToFight') }}
             </p>
           </div>
 
           <div class="space-y-4">
-            <!-- Chinese Option -->
-            <button (click)="selectBattleLanguage('zh')" class="w-full text-left p-5 rounded-2xl bg-slate-800 hover:bg-gradient-to-r hover:from-slate-800 hover:to-orange-950/20 border border-slate-700 hover:border-orange-500 transition-all group flex items-center justify-between shadow-md">
-              <div class="pr-4">
-                <h5 class="text-sm font-bold text-slate-100 group-hover:text-orange-400 transition-colors">
+            <!-- Chinese Battle -->
+            <button (click)="selectBattleLanguage('zh')" class="w-full text-left p-5 rounded-2xl bg-zinc-800/80 hover:bg-gradient-to-r hover:from-zinc-800 hover:to-orange-950/20 border border-zinc-700 hover:border-orange-500 transition-all group flex items-center justify-between shadow-md">
+              <div class="pr-4 min-w-0">
+                <h5 class="text-xs md:text-sm font-black text-zinc-100 group-hover:text-orange-400 transition-colors">
                   {{ t('battleChinese') }}
                 </h5>
-                <p class="text-xs text-slate-400 mt-1 lines-2 leading-relaxed">
+                <p class="text-[11px] text-zinc-400 mt-1.5 leading-relaxed">
                   开启神仙级别段子手！大厨将施展地道中式烹饪吐槽、相声级回怼和生动的家常柴米油盐奇招，火力拉满！
                 </p>
               </div>
-              <span class="material-symbols-outlined text-slate-500 group-hover:text-orange-400 group-hover:translate-x-1 duration-200 transition-all">arrow_forward</span>
+              <span class="material-symbols-outlined text-zinc-500 group-hover:text-orange-400 group-hover:translate-x-1 duration-200 transition-all shrink-0">arrow_forward</span>
             </button>
 
-            <!-- English Option -->
-            <button (click)="selectBattleLanguage('en')" class="w-full text-left p-5 rounded-2xl bg-slate-800 hover:bg-gradient-to-r hover:from-slate-800 hover:to-rose-950/20 border border-slate-700 hover:border-rose-500 transition-all group flex items-center justify-between shadow-md">
-              <div class="pr-4">
-                <h5 class="text-sm font-bold text-slate-100 group-hover:text-rose-400 transition-colors">
+            <!-- English Battle -->
+            <button (click)="selectBattleLanguage('en')" class="w-full text-left p-5 rounded-2xl bg-zinc-800/80 hover:bg-gradient-to-r hover:from-zinc-800 hover:to-rose-950/20 border border-zinc-700 hover:border-rose-500 transition-all group flex items-center justify-between shadow-md">
+              <div class="pr-4 min-w-0">
+                <h5 class="text-xs md:text-sm font-black text-zinc-100 group-hover:text-rose-400 transition-colors">
                   {{ t('battleEnglish') }}
                 </h5>
-                <p class="text-xs text-slate-400 mt-1 lines-2 leading-relaxed">
+                <p class="text-[11px] text-zinc-400 mt-1.5 leading-relaxed">
                   Fierce British/American high-energy kitchen roasts. Unleash Ramsay-level wit and hilarious food analogies.
                 </p>
               </div>
-              <span class="material-symbols-outlined text-slate-500 group-hover:text-rose-400 group-hover:translate-x-1 duration-200 transition-all">arrow_forward</span>
+              <span class="material-symbols-outlined text-zinc-500 group-hover:text-rose-400 group-hover:translate-x-1 duration-200 transition-all shrink-0">arrow_forward</span>
             </button>
           </div>
         </div>
       }
 
-      <!-- Step 2: Live Battle Chat Arena -->
+      <!-- Stage 2: Live Battle Arena Messages and Input -->
       @if (battleStep() === 'arena') {
-        <div class="flex-1 flex flex-col min-h-0 bg-slate-950/30">
+        <div class="flex-1 flex flex-col min-h-0 bg-zinc-950/20">
           
-          <!-- Battle Chat Container -->
+          <!-- Battle Chat Scroll Box -->
           <div id="battle-chat-container" class="flex-1 overflow-y-auto p-4 md:p-6 space-y-4">
             @for (msg of battleMessages(); track msg.id) {
               <div class="flex flex-col" [class.items-end]="msg.role === 'user'" [class.items-start]="msg.role === 'chef'">
                 
                 <div class="flex items-start gap-2.5 max-w-[85%]">
                   @if (msg.role === 'chef') {
-                    <div class="w-7 h-7 rounded-full bg-rose-500/10 border border-rose-500/30 flex items-center justify-center text-[14px] mt-1 flex-shrink-0 animate-bounce">
+                    <div class="w-7 h-7 rounded-xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-center text-[14px] mt-1 flex-shrink-0 animate-bounce">
                       🤬
                     </div>
                   }
                   
-                  <div class="p-4 rounded-2xl text-sm leading-relaxed" 
-                       [class.bg-orange-500]="msg.role === 'user'" 
+                  <div class="p-4 rounded-2xl text-xs md:text-sm leading-relaxed font-semibold" 
+                       [class.bg-gradient-to-tr]="msg.role === 'user'"
+                       [class.from-orange-500]="msg.role === 'user'" 
+                       [class.to-pink-500]="msg.role === 'user'" 
                        [class.text-white]="msg.role === 'user'" 
                        [class.rounded-tr-none]="msg.role === 'user'"
-                       [class.bg-slate-800]="msg.role === 'chef'" 
-                       [class.text-slate-100]="msg.role === 'chef'" 
+                       [class.bg-zinc-800]="msg.role === 'chef'" 
+                       [class.text-zinc-100]="msg.role === 'chef'" 
                        [class.rounded-tl-none]="msg.role === 'chef'"
                        [class.border]="msg.role === 'chef'"
-                       [class.border-slate-700]="msg.role === 'chef'">
+                       [class.border-zinc-700]="msg.role === 'chef'">
                     <p [innerHTML]="msg.content"></p>
                   </div>
                 </div>
 
-                <!-- Timestamp or role visual anchor -->
-                <span class="text-[10px] text-slate-500 mt-1 px-1">
+                <span class="text-[9px] font-extrabold text-zinc-500 mt-1 px-1 uppercase tracking-wider">
                   {{ msg.role === 'chef' ? 'Kitchen Wizard' : 'You' }}
                 </span>
 
               </div>
             }
 
-            <!-- Loading Indicator Inside Battle -->
+            <!-- Battle Loading bubble -->
             @if (battleIsLoading()) {
               <div class="flex items-start gap-2.5">
-                <div class="w-7 h-7 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-[14px] flex-shrink-0">
+                <div class="w-7 h-7 rounded-xl bg-zinc-800 border border-zinc-700 flex items-center justify-center text-[14px] flex-shrink-0">
                   🍳
                 </div>
-                <div class="bg-slate-800 border border-slate-700 rounded-2xl rounded-tl-none p-3.5 flex items-center gap-1 text-slate-400 text-xs h-10 shadow-md">
-                  <span class="w-1.5 h-1.5 rounded-full bg-orange-500 animate-bounce" style="animation-delay: 0.1s"></span>
-                  <span class="w-1.5 h-1.5 rounded-full bg-orange-500 animate-bounce" style="animation-delay: 0.2s"></span>
-                  <span class="w-1.5 h-1.5 rounded-full bg-orange-500 animate-bounce" style="animation-delay: 0.3s"></span>
+                <div class="bg-zinc-800 border border-zinc-700 rounded-2xl rounded-tl-none p-3.5 flex items-center justify-center gap-1.5 h-10 shadow-md">
+                  <span class="w-1.5 h-1.5 rounded-full bg-orange-500 animate-bounce" style="animation-duration: 0.6s; animation-delay: 0.1s"></span>
+                  <span class="w-1.5 h-1.5 rounded-full bg-orange-500 animate-bounce" style="animation-duration: 0.6s; animation-delay: 0.2s"></span>
+                  <span class="w-1.5 h-1.5 rounded-full bg-orange-500 animate-bounce" style="animation-duration: 0.6s; animation-delay: 0.3s"></span>
                 </div>
               </div>
             }
           </div>
 
-          <!-- Battle Action & Input Panel -->
-          <div class="p-4 border-t border-slate-800 bg-slate-900/60 backdrop-blur-md">
+          <!-- Bottom Combat Input Bar -->
+          <div class="p-4 border-t border-zinc-800 bg-zinc-900/80 backdrop-blur-md">
             <form (submit)="sendBattleMessage($event)" class="flex gap-2.5 items-center">
               
-              <!-- Concede / Give Up Button -->
+              <!-- White Flag concession trigger -->
               <button type="button" 
                       (click)="concedeBattle()" 
                       [disabled]="battleIsLoading()" 
-                      class="px-3 md:px-4 py-3 bg-rose-500/10 hover:bg-rose-500/20 active:bg-rose-500/30 text-rose-400 hover:text-rose-300 border border-rose-500/30 rounded-xl font-bold text-xs flex items-center gap-1.5 transition-all outline-none flex-shrink-0 disabled:opacity-50">
-                <span class="material-symbols-outlined text-[14px]">flag</span>
-                <span class="hidden sm:inline">{{ t('battleConcede') }}</span>
+                      class="px-3.5 py-3 h-11 bg-rose-500/10 hover:bg-rose-500/20 active:scale-95 text-rose-450 border border-rose-500/30 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all outline-none flex-shrink-0 disabled:opacity-50">
+                <span class="material-symbols-outlined text-[14px] font-black">flag</span>
+                <span class="hidden sm:inline uppercase tracking-wider">{{ t('battleConcede').split('（')[0] }}</span>
               </button>
 
-              <!-- Main Debate Input -->
+              <!-- Text Area input -->
               <input type="text"
                      [(ngModel)]="battleInput"
                      name="battleInput"
                      [disabled]="battleIsLoading()"
                      [placeholder]="t('battleInputPlaceholder')"
-                     class="flex-1 px-4 py-3 bg-slate-800 text-slate-100 border border-slate-700 rounded-xl focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 placeholder-slate-500 outline-none text-sm transition-all">
+                     class="flex-1 px-4 py-3 h-11 bg-zinc-850 text-zinc-100 border border-zinc-750 rounded-xl focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 placeholder-zinc-500 outline-none text-xs md:text-sm transition-all text-ellipsis">
 
-              <!-- Send Button -->
+              <!-- Fight Action Send Button -->
               <button type="submit"
                       [disabled]="battleIsLoading() || !battleInput().trim()"
-                      class="p-3 bg-gradient-to-r from-orange-500 to-amber-500 hover:brightness-110 active:scale-95 disabled:opacity-40 disabled:scale-100 text-white rounded-xl shadow-md cursor-pointer transition-all flex items-center justify-center flex-shrink-0">
+                      class="p-3 w-11 h-11 bg-gradient-to-r from-orange-500 to-pink-500 hover:brightness-110 active:scale-95 disabled:opacity-45 disabled:scale-100 text-white rounded-xl shadow-md transition-all flex items-center justify-center flex-shrink-0">
                 <span class="material-symbols-outlined text-[18px]">send</span>
               </button>
 
